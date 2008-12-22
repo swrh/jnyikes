@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Fernando Silveira <swrh@users.sourceforge.net>
+ * Copyright 2005, 2008 Fernando Silveira <fsilveira@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,12 +28,12 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LLIST_H_
-#define LLIST_H_
+#if !defined(_LLIST_H_)
+#define _LLIST_H_
 
 struct st_llist {
-    struct st_llist *next;
-    struct st_llist *prev;
+	struct st_llist *next;
+	struct st_llist *prev;
 };
 
 void llappend(void **base_v, void *item_v);
@@ -42,6 +42,4 @@ void llcut(void **base_v, void *item_v);
 void lldel(void **base_v, void *item_v);
 void lldestroy(void **base_v);
 
-#endif /* LLIST_H_ */
-
-/* vi:set sw=4: */
+#endif /* !defined(_LLIST_H_) */

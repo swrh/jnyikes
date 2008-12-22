@@ -36,7 +36,7 @@ void
 llappend(void **base_v, void *item_v)
 {
 	struct st_llist *p;
-	struct st_llist **base = (struct st_llist **) base_v, *item = item_v;
+	struct st_llist **base = (struct st_llist **)base_v, *item = item_v;
 
 	assert(base != NULL);
 	assert(item != NULL);
@@ -57,7 +57,7 @@ llappend(void **base_v, void *item_v)
 void
 llprepend(void **base_v, void *item_v)
 {
-	struct st_llist **base = (struct st_llist **) base_v, *item = item_v;
+	struct st_llist **base = (struct st_llist **)base_v, *item = item_v;
 
 	assert(base != NULL);
 	assert(item != NULL);
@@ -77,7 +77,7 @@ llprepend(void **base_v, void *item_v)
 void
 llcut(void **base_v, void *item_v)
 {
-	struct st_llist **base = (struct st_llist **) base_v, *item = item_v;
+	struct st_llist **base = (struct st_llist **)base_v, *item = item_v;
 
 	assert(base != NULL);
 	assert(item != NULL);
@@ -103,7 +103,7 @@ llcut(void **base_v, void *item_v)
 void
 lldel(void **base_v, void *item_v)
 {
-	struct st_llist **base = (struct st_llist **) base_v, *item = item_v;
+	struct st_llist **base = (struct st_llist **)base_v, *item = item_v;
 
 	assert(base != NULL);
 	assert(item != NULL);
@@ -117,7 +117,7 @@ lldel(void **base_v, void *item_v)
 void
 lldestroy(void **base_v)
 {
-	struct st_llist **base = (struct st_llist **) base_v;
+	struct st_llist **base = (struct st_llist **)base_v;
 
 	assert(base != NULL);
 
@@ -127,7 +127,5 @@ lldestroy(void **base_v)
 	assert((*base)->prev == NULL);
 
 	while (*base)
-		lldel((void **) base, *base);
+		lldel((void **)base, *base);
 }
-
-/* vi:set sw=4: */

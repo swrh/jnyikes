@@ -1,5 +1,5 @@
-#ifndef INTERFACE_H_
-#define INTERFACE_H_
+#if !defined(_INTERFACE_H_)
+#define _INTERFACE_H_
 
 /*
  * As aplicações que forem utilizar esta biblioteca terão que se ligar também
@@ -9,4 +9,4 @@
  * http://java.sun.com/j2se/1.4.2/docs/guide/vm/signal-chaining.html
  */
  
-#endif /*INTERFACE_H_*/
+#endif /* !defined(_INTERFACE_H_) */

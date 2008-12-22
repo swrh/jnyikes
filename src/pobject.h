@@ -1,5 +1,5 @@
-#ifndef POBJECT_H_
-#define POBJECT_H_
+#if !defined(_POBJECT_H_)
+#define _POBJECT_H_
 
 #define bool jboolean
 #define TRUE JNI_TRUE
@@ -84,4 +84,4 @@
 
 #endif
 
-#endif /* POBJECT_H_ */
+#endif /* !defined(_POBJECT_H_) */

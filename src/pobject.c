@@ -42,7 +42,7 @@ struct st_method_ll {
 	char *sign;
 	int rettype;
 	jmethodID jmid;
-}; 
+};
 
 
 void
@@ -54,7 +54,7 @@ pobject_free_method_ll(struct st_method_ll **mll) {
 			free((*mll)->name);
 		if ((*mll)->sign != NULL)
 			free((*mll)->sign);
-		lldel((void **) mll, *mll);
+		lldel((void **)mll, *mll);
 	}
 }
 
@@ -92,12 +92,12 @@ pobject_property_ll_free(struct st_pobject_property_ll **head_ll)
 
 	/* Libera o conteudo de cada "st_property". */
 	for (p_ll = *head_ll; p_ll != NULL;
-	    p_ll = (struct st_pobject_property_ll *) p_ll->ll.next) {
+	    p_ll = (struct st_pobject_property_ll *)p_ll->ll.next) {
 		pobject_property_free(&p_ll->st);
 	}
 
 	/* Destroi a lista ligada. */
-	lldestroy((void **) head_ll);
+	lldestroy((void **)head_ll);
 }
 
 /** Libera toda a estrutura "st_pobject". */
@@ -169,7 +169,7 @@ pobject_get_type_size(enum e_pobject_type t)
 			return sizeof(struct st_pobject);
 		case POBJECT_TYPE_STRING:
 		default:
-			return (size_t) POBJECT_ERROR_EINVAL;
+			return (size_t)POBJECT_ERROR_EINVAL;
 	}
 }
 
@@ -242,17 +242,17 @@ pobject_set_property(struct st_pobject *p, const char *method_name, enum e_pobje
 	 */
 	if (data_type == POBJECT_TYPE_STRING) {
 		if (orig_data != NULL) {
-			data_size = strlen((char *) orig_data) + 1;
+			data_size = strlen((char *)orig_data) + 1;
 DEBUG_STR(method_name);
 DEBUG_STR((char *)orig_data);
-		} else 
+		} else
 			data_size = 0;
 	} else {
 		if (orig_data != NULL) {
 			data_size = pobject_get_type_size(data_type);
 			PJNI_ASSERT_RETURN(data_size != POBJECT_ERROR_EINVAL, POBJECT_ERROR_EINVAL);
 DEBUG_STR(method_name);
-		} else 
+		} else
 			data_size = 0;
 	}
 
@@ -266,7 +266,7 @@ DEBUG_STR(method_name);
 		memcpy(data, orig_data, data_size);
 	} else
 		data = NULL;
-	
+
 	p_ll = malloc(sizeof(struct st_pobject_property_ll));
 	if (p_ll == NULL) {
 		if (data_size > 0 )
@@ -289,7 +289,7 @@ DEBUG_STR(method_name);
 		return POBJECT_ERROR_ENOMEM;
 	}
 
-	llappend((void **) &p->properties, p_ll);
+	llappend((void *)&p->properties, p_ll);
 
 	return POBJECT_SUCCESS;
 }
@@ -387,12 +387,12 @@ pobject_get_method_signature(enum e_pobject_type type_ret, void *type_ret_detail
 			break;						\
 		case POBJECT_TYPE_POBJECT:				\
 			strcat(s, "L");					\
-			strcat(s, ((struct st_pobject *) param)->clazz);\
+			strcat(s, ((struct st_pobject *)param)->clazz);	\
 			strcat(s, ";");					\
 			break;						\
 		case POBJECT_TYPE_JCLASS:				\
 			strcat(s, "L");					\
-			strcat(s, (char *) param);			\
+			strcat(s, (char *)param);			\
 			strcat(s, ";");					\
 			break;						\
 	}								\
@@ -426,7 +426,7 @@ pobject_get_method_signature(enum e_pobject_type type_ret, void *type_ret_detail
 	else if (type_param == POBJECT_TYPE_STRING)	/* Lpath/Class; */
 		slen += strlen(g_str_clazz_string) + 2;
 	else if (type_param == POBJECT_TYPE_POBJECT)	/* Lpath/Class; */
-		slen += strlen(((struct st_pobject *) type_param_detail)->clazz) + 2;
+		slen += strlen(((struct st_pobject *)type_param_detail)->clazz) + 2;
 	else						/* T */
 		slen += 1;
 
@@ -613,7 +613,7 @@ do {									\
 			POBJECT_GET_METHOD(jenv, jcls, jmid, pp->method_name, sig, POBJECT_TYPE_VOID, NULL, POBJECT_TYPE_JCLASS, g_str_clazz_object);
 			rettype = POBJECT_TYPE_VOID;
 		}
-	
+
 		/* Tenta achar o metodo com tipo de parametro java/lang/Object e retorno "boolean". */
 		if (jmid == 0) {
 			POBJECT_GET_METHOD(jenv, jcls, jmid, pp->method_name, sig, POBJECT_TYPE_BOOLEAN, NULL, POBJECT_TYPE_JCLASS, g_str_clazz_object);
@@ -660,51 +660,51 @@ do {									\
 	switch (pp->data_type) {
 		case POBJECT_TYPE_BOOLEAN:
 			if (rettype == POBJECT_TYPE_VOID)
-				(*jenv)->CallVoidMethod(jenv, j, jmid, (jboolean) *((jboolean *) pp->data));
+				(*jenv)->CallVoidMethod(jenv, j, jmid, (jboolean) *((jboolean *)pp->data));
 			else if (rettype == POBJECT_TYPE_BOOLEAN)
-				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jboolean) *((jboolean *) pp->data));
+				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jboolean) *((jboolean *)pp->data));
 			break;
 		case POBJECT_TYPE_BYTE:
 			if (rettype == POBJECT_TYPE_VOID)
-				(*jenv)->CallVoidMethod(jenv, j, jmid, (jbyte) *((char *) pp->data));
+				(*jenv)->CallVoidMethod(jenv, j, jmid, (jbyte) *((char *)pp->data));
 			else if (rettype == POBJECT_TYPE_BOOLEAN)
-				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jbyte) *((char *) pp->data));
+				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jbyte) *((char *)pp->data));
 			break;
 		case POBJECT_TYPE_CHAR:
 			if (rettype == POBJECT_TYPE_VOID)
-				(*jenv)->CallVoidMethod(jenv, j, jmid, (jchar) *((char *) pp->data));
+				(*jenv)->CallVoidMethod(jenv, j, jmid, (jchar) *((char *)pp->data));
 			else if (rettype == POBJECT_TYPE_BOOLEAN)
-				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jchar) *((char *) pp->data));
+				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jchar) *((char *)pp->data));
 			break;
 		case POBJECT_TYPE_SHORT:
 			if (rettype == POBJECT_TYPE_VOID)
-				(*jenv)->CallVoidMethod(jenv, j, jmid, (jshort) *((short *) pp->data));
+				(*jenv)->CallVoidMethod(jenv, j, jmid, (jshort) *((short *)pp->data));
 			else if (rettype == POBJECT_TYPE_BOOLEAN)
-				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jshort) *((short *) pp->data));
+				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jshort) *((short *)pp->data));
 			break;
 		case POBJECT_TYPE_INT:
 			if (rettype == POBJECT_TYPE_VOID)
-				(*jenv)->CallVoidMethod(jenv, j, jmid, (jint) *((int *) pp->data));
+				(*jenv)->CallVoidMethod(jenv, j, jmid, (jint) *((int *)pp->data));
 			else if (rettype == POBJECT_TYPE_BOOLEAN)
-				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jint) *((int *) pp->data));
+				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jint) *((int *)pp->data));
 			break;
 		case POBJECT_TYPE_LONG:
 			if (rettype == POBJECT_TYPE_VOID)
-				(*jenv)->CallVoidMethod(jenv, j, jmid, (jlong) *((long *) pp->data));
+				(*jenv)->CallVoidMethod(jenv, j, jmid, (jlong) *((long *)pp->data));
 			else if (rettype == POBJECT_TYPE_BOOLEAN)
-				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jlong) *((long *) pp->data));
+				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jlong) *((long *)pp->data));
 			break;
 		case POBJECT_TYPE_FLOAT:
 			if (rettype == POBJECT_TYPE_VOID)
-				(*jenv)->CallVoidMethod(jenv, j, jmid, (jfloat) *((float *) pp->data));
+				(*jenv)->CallVoidMethod(jenv, j, jmid, (jfloat) *((float *)pp->data));
 			else if (rettype == POBJECT_TYPE_BOOLEAN)
-				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jfloat) *((float *) pp->data));
+				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jfloat) *((float *)pp->data));
 			break;
 		case POBJECT_TYPE_DOUBLE:
 			if (rettype == POBJECT_TYPE_VOID)
-				(*jenv)->CallVoidMethod(jenv, j, jmid, (jdouble) *((double *) pp->data));
+				(*jenv)->CallVoidMethod(jenv, j, jmid, (jdouble) *((double *)pp->data));
 			else if (rettype == POBJECT_TYPE_BOOLEAN)
-				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jdouble) *((double *) pp->data));
+				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid, (jdouble) *((double *)pp->data));
 			break;
 		case POBJECT_TYPE_VOID:
 			if (rettype == POBJECT_TYPE_VOID)
@@ -713,7 +713,7 @@ do {									\
 				(void)(*jenv)->CallBooleanMethod(jenv, j, jmid);
 			break;
 		case POBJECT_TYPE_POBJECT:
-			ret = pobject_p2j(jenv, (struct st_pobject *) pp->data, &new_jobj);
+			ret = pobject_p2j(jenv, (struct st_pobject *)pp->data, &new_jobj);
 			if (ret != POBJECT_SUCCESS) {
 #ifdef POBJECT_DEBUG_ERROR
 				fprintf(stderr, "%s while converting an \"st_pobject\" structure to \"jobject\" at \"%s:%d\".\n", pobject_get_error_name(ret), __FILE__, __LINE__);
@@ -732,7 +732,7 @@ do {									\
 
 			break;
 		case POBJECT_TYPE_STRING:
-			new_jstr = (*jenv)->NewStringUTF(jenv, (char *) pp->data);
+			new_jstr = (*jenv)->NewStringUTF(jenv, (char *)pp->data);
 			if (new_jstr != NULL) {
 				if (rettype == POBJECT_TYPE_VOID)
 					(*jenv)->CallVoidMethod(jenv, j, jmid, new_jstr);
@@ -803,7 +803,7 @@ pobject_fill_jobject(JNIEnv *jenv, jobject j, struct st_pobject *p)
 	}
 
 	for (p_ll = p->properties; p_ll != NULL;
-	    p_ll = (struct st_pobject_property_ll *) p_ll->ll.next) {
+	    p_ll = (struct st_pobject_property_ll *)p_ll->ll.next) {
 #ifdef POBJECT_DEBUG_VERBOSE
 		printf("DEBUG: configurando propriedade \"%s\" do objeto de classe \"%s\".\n", p_ll->st.method_name, p->clazz);
 		fflush(stdout);
@@ -1042,7 +1042,7 @@ pobject_java_convert_str(char *str, char o, char d)
 
 	PJNI_ASSERT_RETURN_VOID(str != NULL);
 
-	for (p = strchr(str, (int) o); p != NULL; p = strchr(p, (int) o))
+	for (p = strchr(str, (int)o); p != NULL; p = strchr(p, (int)o))
 		*p = d;
 }
 
@@ -1251,7 +1251,7 @@ pobject_get_method_sign_list(JNIEnv *jenv, jclass cls, struct st_method_ll **mll
 			if (m != NULL) {
 				pobject_java_convert_str(m->sign, '.', '/');
 				m->jmid = (*jenv)->GetMethodID(jenv, cls, m->name, m->sign);
-				/* printf("%s: %s%s (%#010x) (%s)\n", __FUNCTION__, m->name, m->sign, (unsigned int) m->jmid, str); */
+				/* printf("%s: %s%s (%#010x) (%s)\n", __FUNCTION__, m->name, m->sign, (unsigned int)m->jmid, str); */
 				if ((m->jmid == NULL) || (*jenv)->ExceptionCheck(jenv)) {
 #ifdef POBJECT_DEBUG_ERROR
 					fprintf(stderr, "Could not get method id at \"%s:%d\".\n", __FILE__, __LINE__);
@@ -1265,7 +1265,7 @@ pobject_get_method_sign_list(JNIEnv *jenv, jclass cls, struct st_method_ll **mll
 					return POBJECT_ERROR_EINVAL;
 				}
 
-				llappend((void **) mll, (void *) m);
+				llappend((void **)mll, (void *)m);
 			}
 		}
 
@@ -1405,7 +1405,7 @@ pobject_fetch_property_int(JNIEnv *jenv, jclass jcls, jobject j, struct st_pobje
 	}
 
 	ret = pobject_set_property(p, m->name, m->rettype, (void *) &val);
-	
+
 	DEBUG_STR(m->name);
 	DEBUG_INT(val);
 
@@ -1519,7 +1519,7 @@ pobject_fetch_property_string(JNIEnv *jenv, jclass jcls, jobject j, struct st_po
 
 	if (jstr == NULL) {
 		DEBUG_STR("Deu STR = NULL");
-		str = NULL;	
+		str = NULL;
 	} else {
 		str = (*jenv)->GetStringUTFChars(jenv, jstr, 0);
 		if (str == NULL) {
@@ -1528,7 +1528,7 @@ pobject_fetch_property_string(JNIEnv *jenv, jclass jcls, jobject j, struct st_po
 		}
 	}
 
-	ret = pobject_set_property(p, m->name, m->rettype, (void *) str);
+	ret = pobject_set_property(p, m->name, m->rettype, (void *)str);
 	DEBUG_STR(str);
 
 	if (jstr != NULL) {
@@ -1539,7 +1539,7 @@ pobject_fetch_property_string(JNIEnv *jenv, jclass jcls, jobject j, struct st_po
 	/* Está certo rodar o DeleteLocalRef() com ponteiro NULL, NÃO
 	 * APAGUE! Se isto não for feito, acontece um JNI leak. */
 	(*jenv)->DeleteLocalRef(jenv, jstr);
-	
+
 	return ret;
 }
 
@@ -1571,7 +1571,7 @@ pobject_fetch_property_pobject(JNIEnv *jenv, jclass jcls, jobject j, struct st_p
 	if (jnew == NULL) {
 		DEBUG_STR("Deu POBJECT = NULL");
 		pnew = NULL;
-		ret = pobject_set_property(p, m->name, POBJECT_TYPE_POBJECT, (void *) pnew);
+		ret = pobject_set_property(p, m->name, POBJECT_TYPE_POBJECT, (void *)pnew);
 		return ret;
 	}
 
@@ -1584,7 +1584,7 @@ pobject_fetch_property_pobject(JNIEnv *jenv, jclass jcls, jobject j, struct st_p
 	ret = pobject_j2p(jenv, jnew, pnew);
 	(*jenv)->DeleteLocalRef(jenv, jnew);
 	if (ret == POBJECT_SUCCESS)
-		ret = pobject_set_property(p, m->name, POBJECT_TYPE_POBJECT, (void *) pnew);
+		ret = pobject_set_property(p, m->name, POBJECT_TYPE_POBJECT, (void *)pnew);
 	else
 		pobject_free(pnew);
 	free(pnew); /* This pointer has already been used. Free it. */
@@ -1654,7 +1654,7 @@ pobject_fetch_property_list(JNIEnv *jenv, jclass jcls, jobject j, struct st_pobj
 	PJNI_ASSERT_RETURN(p != NULL, POBJECT_ERROR_EINVAL);
 	PJNI_ASSERT_RETURN(mll != NULL, POBJECT_ERROR_EINVAL);
 
-	for (; mll != NULL; mll = (struct st_method_ll *) mll->ll.next) {
+	for (; mll != NULL; mll = (struct st_method_ll *)mll->ll.next) {
 		ret = pobject_fetch_property(jenv, jcls, j, p, mll);
 		if (ret != POBJECT_SUCCESS) {
 			return ret;
@@ -1664,7 +1664,7 @@ pobject_fetch_property_list(JNIEnv *jenv, jclass jcls, jobject j, struct st_pobj
 	return POBJECT_SUCCESS;
 }
 
-/** TODO Converte o objeto Java (j) em uma estrutura "st_pobject"(p). */
+/** TODO Converte o objeto Java (j) em uma estrutura "st_pobject" (p). */
 int
 pobject_j2p(JNIEnv *jenv, jobject j, struct st_pobject *p)
 {
@@ -1719,7 +1719,7 @@ pobject_j2p(JNIEnv *jenv, jobject j, struct st_pobject *p)
 		return POBJECT_ERROR_EINVAL;
 	}
 
-	/* 
+	/*
 	 * Inicia a estrutura com a assinatura da classe.
 	 */
 	ret = pobject_init(p, str);
@@ -1736,7 +1736,7 @@ pobject_j2p(JNIEnv *jenv, jobject j, struct st_pobject *p)
 		fflush(stderr);
 
 		(*jenv)->DeleteLocalRef(jenv, jcls);
-		
+
 		pobject_free(p);
 		return ret;
 	}
@@ -1788,14 +1788,15 @@ pobject_j2p(JNIEnv *jenv, jobject j, struct st_pobject *p)
 
 		return ret;
 	}
-	
+
 pobject_free_method_ll(&mll);
 
 	return POBJECT_SUCCESS;
 }
 
-/** TODO Lê a propriedade de uma estrutura "st_pobject". 
- *  passa soh o ponteiro 
+/**
+ * TODO Lê a propriedade de uma estrutura "st_pobject".
+ * Passa só o ponteiro.
  */
 int
 pobject_get_property(struct st_pobject *p, char *getter, enum e_pobject_type data_type, void **data)
@@ -1808,8 +1809,10 @@ pobject_get_property(struct st_pobject *p, char *getter, enum e_pobject_type dat
 	return POBJECT_ERROR_ENOSYS;
 }
 
-/* TODO le dados da estrutura "st_pobject" e copia em "data"
- * duplica os dados (aloca memoria) */
+/**
+ * TODO Lê dados da estrutura "st_pobject" e copia em "data".
+ * Duplica os dados (aloca memória).
+ */
 int
 pobject_get_property_copy(struct st_pobject *p, char *getter, enum e_pobject_type data_type, void **buf)
 {
@@ -1823,12 +1826,12 @@ pobject_get_property_copy(struct st_pobject *p, char *getter, enum e_pobject_typ
 DEBUG_STR("copy");
 DEBUG_STR(getter);
 DEBUG_STR(p->clazz);
-	
+
 	/*  varre lista e compara "getter" */
 	for (reg_atual = p->properties;
 	    reg_atual != NULL;
 	    reg_atual = (struct st_pobject_property_ll *)reg_atual->ll.next) {
-		if (strncmp(reg_atual->st.method_name, getter, 255) == 0) 
+		if (strncmp(reg_atual->st.method_name, getter, 255) == 0)
 			break;
 	}
 
@@ -1839,12 +1842,12 @@ DEBUG_STR(p->clazz);
 	if (data_type == POBJECT_TYPE_STRING || data_type == POBJECT_TYPE_POBJECT) {
 		if (reg_atual->st.data == NULL) {
 			*buf = NULL;
-			return POBJECT_SUCCESS;			
+			return POBJECT_SUCCESS;
 		}
 	}
 
 	if (data_type == POBJECT_TYPE_STRING) {
-		data_size = strlen((char *) reg_atual->st.data) + 1;
+		data_size = strlen((char *)reg_atual->st.data) + 1;
 	} else {
 		data_size = pobject_get_type_size(data_type);
 		PJNI_ASSERT_RETURN(data_size != POBJECT_ERROR_EINVAL, POBJECT_ERROR_EINVAL);
@@ -1864,14 +1867,14 @@ DEBUG_STR(p->clazz);
 DEBUG_STR((char *)*buf);
 	} else
 DEBUG_PTR(*buf);
-	 
-	return POBJECT_SUCCESS;			
+
+	return POBJECT_SUCCESS;
 }
 
-/* 
- * grava no buffer passado(buf) de tamanho "buf_size", e sem alocar nada, o 
+/*
+ * grava no buffer passado(buf) de tamanho "buf_size", e sem alocar nada, o
  * dado da estrutura "st_pobject", retornado pelo "getter"
- */ 
+ */
 int
 pobject_get_property_buf(struct st_pobject *p, char *getter, enum e_pobject_type data_type, void *buf, size_t buf_size)
 {
@@ -1896,7 +1899,7 @@ DEBUG_STR(p->clazz);
 	for (reg_atual = p->properties;
 	    reg_atual != NULL;
 	    reg_atual = (struct st_pobject_property_ll *)reg_atual->ll.next) {
-		if (strncmp(reg_atual->st.method_name, getter, 255) == 0) 
+		if (strncmp(reg_atual->st.method_name, getter, 255) == 0)
 			break;
 	}
 
@@ -1908,14 +1911,14 @@ DEBUG_STR(p->clazz);
 		if (reg_atual->st.data == NULL) {
 			/* buf = NULL;*/
 			memset (buf, 0, buf_size);
-			return POBJECT_SUCCESS;			
+			return POBJECT_SUCCESS;
 		}
 	}
-	
+
 	if (data_type == POBJECT_TYPE_STRING) {
 		/* ajusta o buf */
-		if ((strlen((char *) reg_atual->st.data) + 1) < buf_size)
-			buf_size = strlen((char *) reg_atual->st.data) + 1;
+		if ((strlen((char *)reg_atual->st.data) + 1) < buf_size)
+			buf_size = strlen((char *)reg_atual->st.data) + 1;
 	}
 
 	memcpy(buf, reg_atual->st.data, buf_size);
@@ -1924,6 +1927,6 @@ DEBUG_STR(p->clazz);
 DEBUG_STR((char *)buf);
 	} else
 DEBUG_INT(*((int *)buf));
-	 
-	return POBJECT_SUCCESS;			
+
+	return POBJECT_SUCCESS;
 }

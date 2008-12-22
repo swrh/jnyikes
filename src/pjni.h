@@ -1,5 +1,5 @@
-#ifndef PJNI_H_
-#define PJNI_H_
+#if !defined(_PJNI_H_)
+#define _PJNI_H_
 
 #include <errno.h> 
 #include <jni.h>
@@ -185,4 +185,4 @@ int pobject_j2p(JNIEnv *jenv, jobject j, struct st_pobject *p);
  */
 int start_main_thread(void);
 
-#endif /* PJNI_H_ */
+#endif /* !defined(_PJNI_H_) */
