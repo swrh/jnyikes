@@ -74,8 +74,9 @@ struct st_method_ll {
 	jmethodID jmid;
 };
 
+static void pobject_free_method_ll(struct st_method_ll **mll);
 
-void
+static void
 pobject_free_method_ll(struct st_method_ll **mll) {
 	PJNI_ASSERT_RETURN_VOID(mll != NULL);
 

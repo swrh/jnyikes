@@ -1,25 +1,15 @@
 # Makefile
 
-LIB	= libjnyikes.so
-OBJS	= llist.o pobject.o interface.o
+LIB=		jnyikes
+SRCS=		llist.c pobject.c interface.c
 
-JAVADIR	= /usr/lib/jvm/java-1.5.0-sun-1.5.0.14
+JAVADIR=	/usr/lib/jvm/java-1.5.0-sun-1.5.0.14
 
-CFLAGS	= -O2 -pipe -Wall -Werror -Wshadow \
-	  -I$(JAVADIR)/include \
-	  -I$(JAVADIR)/include/linux
+INCDIRS=	$(JAVADIR)/include $(JAVADIR)/include/linux
+DEPLIBS=	pthread
 
-LDFLAGS	= -shared -lpthread
+CFLAGS+=	-D_REENTRANT -Wmissing-prototypes \
+		-I$(JAVADIR)/include \
+		-I$(JAVADIR)/include/linux
 
-CC	= gcc
-
-.PHONY: all
-all: $(LIB)
-
-.PHONY: clean
-clean:
-	$(RM) $(LIB)
-	$(RM) $(OBJS)
-
-$(LIB): $(OBJS)
-	$(CC) -o $(LIB) $(LDFLAGS) $(OBJS)
+include ../mk/targets.mk
