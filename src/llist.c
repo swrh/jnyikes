@@ -1,5 +1,5 @@
 /*
- * Copyright 2005 Fernando Silveira <swrh@users.sourceforge.net>
+ * Copyright 2005, 2008 Fernando Silveira <fsilveira@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,6 +11,7 @@
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
  *      This product includes software developed by Fernando Silveira.
  * 4. The name of the author may not be used to endorse or promote products
  *    derived from this software without specific prior written permission.
