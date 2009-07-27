@@ -28,17 +28,17 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "app.h"
 #include "pjni.h"
 
-void
+static int
 app_main(JavaVM *jvm, JNIEnv *jenv)
 {
+	return 0;
 }
 
 int
 main(void)
 {
-	start_main_thread();
+	start_thread(app_main);
 	return 0;
 }

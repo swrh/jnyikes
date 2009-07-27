@@ -31,7 +31,7 @@
 PROG=		test
 SRCS=		main.c
 
-JAVADIR=	/usr/lib/jvm/java-1.5.0-sun-1.5.0.14
+include ../config.mk
 
 INCDIRS=	../src $(JAVADIR)/include $(JAVADIR)/include/linux
 LIBDIRS=	../src
