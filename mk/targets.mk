@@ -1,6 +1,6 @@
 # targets.mk
 #
-# Copyright 2005, 2008 Fernando Silveira <fsilveira@gmail.com>
+# Copyright 2005, 2009 Fernando Silveira <fsilveira@gmail.com>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

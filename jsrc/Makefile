@@ -28,15 +28,38 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-PROG=		test
-SRCS=		main.c
+include ../config.mk
 
-JAVADIR=	/usr/lib/jvm/java-1.5.0-sun-1.5.0.14
+SRCDIR=		org/jnyikes
 
-INCDIRS=	../src $(JAVADIR)/include $(JAVADIR)/include/linux
-LIBDIRS=	../src
-DEPLIBS=	jnyikes
+TMPMK=		.tmp.mk
 
-CFLAGS+=	-D_REENTRANT -Wmissing-prototypes
+.PHONY: all clean
+all clean:
+	@[ -f $(TMPMK) ] || $(MAKE) $(TMPMK)
+	@$(MAKE) -f $(TMPMK) $@
 
-include ../mk/targets.mk
+# This target will create a temporary Makefile named as $(TMPMK) which will be
+# updated with all ".java" and ".class" files before each "all" and "clean"
+# targets. The $(TMPMK) is used as list of files to be compiled and/or cleaned.
+#
+# FIXME If for any reason the file creation fails, an error will not be noticed
+# by make(1) unless find(1) fails too.
+.PHONY: $(TMPMK)
+$(TMPMK):
+	@find $(SRCDIR) -name '*.java' | ( \
+			echo "# $@"; \
+			echo ".DEFAULT_GOAL=all"; \
+			echo "%.class: %.java"; \
+			echo $$'\tjavac $$<'; \
+			all=""; \
+			while read j; do \
+				c="$${j%.java}.class"; \
+				all="$${all} $${c}"; \
+				echo "$${c}: $${j}"; \
+			done; \
+			echo "all:$${all}"; \
+			echo "clean:"; \
+			echo $$'\t$$(RM)'"$${all}"; \
+			echo $$'\t$$(RM) $@'; \
+		) > "$@"

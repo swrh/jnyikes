@@ -28,15 +28,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-PROG=		test
-SRCS=		main.c
+SUBDIRS=	src jsrc
 
-JAVADIR=	/usr/lib/jvm/java-1.5.0-sun-1.5.0.14
+ifeq ($(wildcard config.mk),)
+$(error Please create a config.mk file based on config-example.mk)
+endif
 
-INCDIRS=	../src $(JAVADIR)/include $(JAVADIR)/include/linux
-LIBDIRS=	../src
-DEPLIBS=	jnyikes
-
-CFLAGS+=	-D_REENTRANT -Wmissing-prototypes
-
-include ../mk/targets.mk
+include config.mk
+include mk/targets.mk

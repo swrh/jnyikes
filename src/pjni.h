@@ -1,5 +1,5 @@
 /*
- * Copyright 2005, 2008 Fernando Silveira <fsilveira@gmail.com>
+ * Copyright 2005, 2009 Fernando Silveira <fsilveira@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -211,8 +211,10 @@ int pobject_p2j(JNIEnv *jenv, struct st_pobject *p, jobject *j);
 int pobject_j2p(JNIEnv *jenv, jobject j, struct st_pobject *p);
 
 /**
- * Inicia a thread principal da aplicação C.
+ * Starts a thread in a separated function.
+ *
+ * @param thrfn The function pointer to be executed in a separated thread.
  */
-int start_main_thread(void);
+int start_thread(int (*thrfn)(JavaVM *, JNIEnv *));
 
 #endif /* !defined(_PJNI_H_) */

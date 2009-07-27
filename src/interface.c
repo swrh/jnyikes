@@ -1,5 +1,5 @@
 /*
- * Copyright 2005, 2008 Fernando Silveira <fsilveira@gmail.com>
+ * Copyright 2005, 2009 Fernando Silveira <fsilveira@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,21 +38,29 @@
 #include "pjni.h"
 
 #include "interface.h"
-#include "app.h"
+
+#define L_PTHREAD_INITIALIZER ((pthread_t)0)
 
 static JavaVM *g_jvm = NULL;
-static pthread_t g_main_thread;
+static pthread_t g_thread = L_PTHREAD_INITIALIZER;
+static int g_thread_running = 0;
+static pthread_mutex_t g_thread_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+struct thrparam_st {
+	JavaVM *jvm;
+	int (*thrfn)(JavaVM *, JNIEnv *);
+};
 
 /**
- * Guarda as informações sobre a máquina virtual Java.
+ * Stores JVM data pointer.
  *
- * Função chamada pela JVM no carregamento da biblioteca.
+ * This function is called automatically by the JVM when it is loaded.
  */
 jint
 JNI_OnLoad(JavaVM *vm, void *reserved)
 {
 #ifdef DEBUG
-	printf("%s(%p, %p);\n", __FUNCTION__, (void *) vm, reserved);
+	printf("%s(%p, %p);\n", __func__, (void *)vm, reserved);
 	fflush(stdout);
 #endif
 
@@ -62,15 +70,15 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
 }
 
 /**
- * Descarrega as informações da biblioteca.
+ * Unload JVM data pointer.
  *
- * Função chamada pela JVM no descarregamento da biblioteca.
+ * This function is called automatically by the JVM when it is unloaded.
  */
 void
 JNI_OnUnload(JavaVM *vm, void *reserved)
 {
 #ifdef DEBUG
-	printf("%s(%p, %p);\n", __FUNCTION__, (void *) vm, reserved);
+	printf("%s(%p, %p);\n", __func__, (void *) vm, reserved);
 	fflush(stdout);
 #endif
 
@@ -78,32 +86,39 @@ JNI_OnUnload(JavaVM *vm, void *reserved)
 }
 
 /**
- * Thread wrapper para a função principal da aplicação C.
+ * Wrapper thread function - loads JVM configurations and runs the thread
+ * function.
  *
- * Carrega as configurações da máquina virtual Java e executa a função C
- * app_main(). Ao invés de chamar esta função diretamente, a função
- * start_main_thread() deve ser executada.
+ * This function shall be called by start_thread(). It will properly start a
+ * separated thread and run the main function passed as argument.
  */
 static void *
-main_thread(void *param)
+l_thread(void *param)
 {
+	int ret;
+	struct thrparam_st *thrp;
 	JavaVMAttachArgs thr_args;
 	JNIEnv *jenv;
 	JavaVM *jvm;
 
 #ifdef DEBUG
-	printf("%s(%p);\n", __FUNCTION__, param);
+	printf("%s(%p);\n", __func__, param);
 	fflush(stdout);
 #endif
 
-	printf("Carregando thread C principal...\n");
-	fflush(stdout);
+	thrp = (struct thrparam_st *)param;
 
-	/* Carrega as configurações do Java. */
-	jvm = (JavaVM *) param;
+	/* Load JVM data pointer. */
+	jvm = thrp->jvm;
 	if (jvm == NULL) {
-		fprintf(stderr, "Ponteiro invalido para maquina virtual Java.\n");
+		fprintf(stderr, "%s(%p); Received an invalid JVM pointer.\n", __func__, param);
 		fflush(stderr);
+
+		/* Reduce our global thread counter. */
+		(void)pthread_mutex_lock(&g_thread_mutex);
+		g_thread_running--;
+		(void)pthread_mutex_unlock(&g_thread_mutex);
+
 		return NULL;
 	}
 
@@ -111,127 +126,96 @@ main_thread(void *param)
 	memset(&thr_args, 0, sizeof(JavaVMAttachArgs));
 	thr_args.version = JNI_VERSION_1_2;
 	thr_args.name = "CCorte";
-	if ((*jvm)->AttachCurrentThread(jvm, (void *) &jenv, &thr_args) < 0) {
-		fprintf(stderr, "Erro conectando a thread principal `a maquina virtual Java.\n");
+	if ((*jvm)->AttachCurrentThread(jvm, (void *)&jenv, &thr_args) < 0) {
+		fprintf(stderr, "%s(%p); Error while attaching current thread to the JVM.\n", __func__, param);
 		fflush(stderr);
+
+		/* Reduce our global thread counter. */
+		(void)pthread_mutex_lock(&g_thread_mutex);
+		g_thread_running--;
+		(void)pthread_mutex_unlock(&g_thread_mutex);
+
 		return NULL;
 	}
 
-	/*(void)pthread_mutex_lock(&g_main_thread_mutex);
-	g_main_thread_running++;
-	(void)pthread_mutex_unlock(&g_main_thread_mutex);*/
+	/* Start thread function. */
+	ret = thrp->thrfn(jvm, jenv);
 
-	printf("Thread C principal carregada. Continuando com a execucao da aplicacao C...\n");
-	fflush(stdout);
-
-	/* Rodar aplicação. */
-	app_main(jvm, jenv);
-
-	/*(void)pthread_mutex_lock(&g_main_thread_mutex);
-	g_main_thread_running--;
-	(void)pthread_mutex_unlock(&g_main_thread_mutex);*/
-
-	printf("Aplicacao C finalizada. Fechando thread principal...\n");
-	fflush(stdout);
+	/* Reduce our global thread counter. */
+	(void)pthread_mutex_lock(&g_thread_mutex);
+	g_thread_running--;
+	(void)pthread_mutex_unlock(&g_thread_mutex);
 
 	/* Descarrega as configurações do Java. */
 	if ((*jvm)->DetachCurrentThread(jvm) < 0) {
-		fprintf(stderr, "Erro desconectando a thread principal da maquina virtual Java.\n");
+		fprintf(stderr, "%s(%p); Error while dettaching current thread from the JVM.\n", __func__, param);
 		fflush(stderr);
 	}
 
-	return NULL;
+	return (void *)ret;
 }
 
 /**
- * Inicia a thread da aplicação C.
+ * Starts a thread in a separated function.
+ *
+ * @param thrfn The function pointer to be executed in a separated thread.
  */
 int
-start_main_thread(void)
+start_thread(int (*thrfn)(JavaVM *, JNIEnv *))
 {
 	pthread_attr_t attr;
+	struct thrparam_st *param;
+	int eno;
+	void *ret;
 
+	/* Lock our global variables mutex. */
+	eno = pthread_mutex_lock(&g_thread_mutex);
+	if (eno != 0) {
+		errno = eno;
+		return -1;
+	}
+
+	/* Check if there already is a thread running. */
+	if (g_thread_running > 0) {
+		(void)pthread_mutex_unlock(&g_thread_mutex);
+		/* A thread is already running. */
+		errno = EADDRINUSE;
+		return -1;
+	}
+	/* No thread is currently running. */
+
+	/* If there already was a thread running, join it. */
+	if (g_thread != L_PTHREAD_INITIALIZER)
+		(void)pthread_join(g_thread, &ret);
+	g_thread = L_PTHREAD_INITIALIZER;
+
+	/* Parameters to be passed to the application function. */
+	param = malloc(sizeof(struct thrparam_st));
+	if (param == NULL) {
+		(void)pthread_mutex_unlock(&g_thread_mutex);
+		return -1;
+	}
+	memset(param, 0, sizeof(struct thrparam_st));
+	param->jvm = g_jvm;
+	param->thrfn = thrfn;
+
+	/* Start the thread. */
 	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	if (pthread_create(&g_main_thread, &attr, main_thread, (void *) g_jvm) != 0)
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+	eno = pthread_create(&g_thread, &attr, l_thread, (void *)param);
+	if (eno != 0) {
+		g_thread = L_PTHREAD_INITIALIZER;
+		(void)pthread_mutex_unlock(&g_thread_mutex);
+		free(param);
+		/* Properly set the errno variable. */
+		errno = eno;
 		return -1;
-	/* TODO esperar a main thread enviar um sinal de ok */
+	}
+
+	/* Ok, now we have a thread running. */
+	g_thread_running++;
+
+	(void)pthread_mutex_unlock(&g_thread_mutex);
 
 	return 0;
 }
-
-/*
-	pobject_append(&o, g_type_float, "pi", &f);
-	pobject_send(&o, "com/provectus/vicunha/corte/jni/objects/PEvento");
-*/
-
-/*
-int
-send_string(char *str)
-{
-	jmethodID mid;
-	jclass cls;
-	JNIEnv *env;
-	jstring jstr;
-
-	env = g_jnienv;
-
-//	printf("%s(%p, \"%s\");\n", __FUNCTION__, env, str);
-//	fflush(stdout);
-
-	if (g_cback_clazz == NULL)
-//	if ((g_cback_clazz == NULL) || (g_cback_method == NULL) || (g_cback_sign == NULL))
-		return -1;
-
-//	cls = (*env)->GetObjectClass(env, obj);
-	cls = (*env)->FindClass(env, g_cback_clazz);
-	if ((*env)->ExceptionOccurred(env)) {
-//		printf("(*env)->FindClass();\n(*env)->ExceptionOccurred(env) = JNI_TRUE;\n");
-//		fflush(stdout);
-		(*env)->ExceptionDescribe(env);
-		fflush(stderr);
-		(*env)->ExceptionClear(env);
-		return -1;
-	}
-
-
-//	mid = (*env)->GetMethodID(env, cls, "prvEntraEvento", "(Ljava/lang/String;)V");
-//	mid = (*env)->GetMethodID(env, cls, "prvEntraEvento", "()V");
-//	mid = (*env)->GetStaticMethodID(env, cls, "prvEntraEvento", "()V");
-	mid = (*env)->GetStaticMethodID(env, cls, "prvEntraMensagem", "(Ljava/lang/String;)V");
-
-//	printf("mid = %p;\n", mid);
-	fflush(stdout);
-
-	if ((*env)->ExceptionOccurred(env)) {
-//		printf("(*env)->ExceptionOccurred(env) = JNI_TRUE;\n");
-//		fflush(stdout);
-		(*env)->ExceptionDescribe(env);
-		fflush(stderr);
-		(*env)->ExceptionClear(env);
-		return -1;
-	}
-
-	if (mid == 0)
-		return -1;
-
-	jstr = (*env)->NewStringUTF(env, str);
-	if ((*env)->ExceptionOccurred(env)) {
-		(*env)->ExceptionDescribe(env);
-		fflush(stderr);
-		(*env)->ExceptionClear(env);
-		if (jstr != NULL)
-			(*env)->ReleaseStringUTFChars(env, jstr, str);
-		return -1;
-	} else if (jstr == NULL) {
-		return -1;
-	}
-
-//	(*env)->CallObjectMethod(env, obj, mid);
-	(*env)->CallStaticVoidMethod(env, cls, mid, jstr);
-	if (jstr != NULL)
-		(*env)->ReleaseStringUTFChars(env, jstr, str);
-
-	return 0;
-}
-*/

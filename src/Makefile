@@ -1,6 +1,6 @@
 # Makefile
 #
-# Copyright 2005, 2008 Fernando Silveira <fsilveira@gmail.com>
+# Copyright 2005, 2009 Fernando Silveira <fsilveira@gmail.com>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 LIB=		jnyikes
 SRCS=		llist.c pobject.c interface.c
 
-JAVADIR=	/usr/lib/jvm/java-1.5.0-sun-1.5.0.14
+include ../config.mk
 
 INCDIRS=	$(JAVADIR)/include $(JAVADIR)/include/linux
 DEPLIBS=	pthread
