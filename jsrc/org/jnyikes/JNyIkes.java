@@ -1,7 +1,9 @@
 package org.jnyikes;
 
-class JNyIkes {
-	public static void main(String args[]) {
-		System.out.println("org.jnyikes.JNyIkes");
+public class JNyIkes {
+	native int sendString(String);
+
+	public static void load() {
+		System.loadLibrary("jnyikes");
 	}
 }

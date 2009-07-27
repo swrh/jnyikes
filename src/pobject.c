@@ -77,7 +77,8 @@ struct st_method_ll {
 static void pobject_free_method_ll(struct st_method_ll **mll);
 
 static void
-pobject_free_method_ll(struct st_method_ll **mll) {
+pobject_free_method_ll(struct st_method_ll **mll)
+{
 	PJNI_ASSERT_RETURN_VOID(mll != NULL);
 
 	while (*mll != NULL) {
