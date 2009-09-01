@@ -30,36 +30,36 @@
 
 include ../config.mk
 
-SRCDIR=		org/jnyikes
+SRCDIR=		src
+BINDIR=		bin
+BINMK=		$(BINDIR)/.mk
 
-TMPMK=		.tmp.mk
+.PHONY: all
+all: $(BINMK)
+	@$(MAKE) -f $(BINMK) $@
 
-.PHONY: all clean
-all clean:
-	@[ -f $(TMPMK) ] || $(MAKE) $(TMPMK)
-	@$(MAKE) -f $(TMPMK) $@
+.PHONY: clean
+clean:
+	$(RM) -r $(BINDIR)
 
-# This target will create a temporary Makefile named as $(TMPMK) which will be
-# updated with all ".java" and ".class" files before each "all" and "clean"
-# targets. The $(TMPMK) is used as list of files to be compiled and/or cleaned.
-#
-# FIXME If for any reason the file creation fails, an error will not be noticed
-# by make(1) unless find(1) fails too.
-.PHONY: $(TMPMK)
-$(TMPMK):
-	@find $(SRCDIR) -name '*.java' | ( \
-			echo "# $@"; \
-			echo ".DEFAULT_GOAL=all"; \
-			echo "%.class: %.java"; \
-			echo $$'\tjavac $$<'; \
-			all=""; \
-			while read j; do \
-				c="$${j%.java}.class"; \
-				all="$${all} $${c}"; \
-				echo "$${c}: $${j}"; \
-			done; \
-			echo "all:$${all}"; \
-			echo "clean:"; \
-			echo $$'\t$$(RM)'"$${all}"; \
-			echo $$'\t$$(RM) $@'; \
-		) > "$@"
+# This target will create a temporary Makefile which will include all ".java"
+# files found under $(SRCDIR) directory.
+$(BINMK): $(shell find $(SRCDIR) ! -path '*/.svn/*' -and -name '*.java')
+	$(MKDIR) -p $(BINDIR)
+	@echo "find $(SRCDIR) > $(BINMK)"; \
+		( \
+		set -e; \
+		src="$^"; \
+		echo "# $(BINMK)"; \
+		echo ".DEFAULT_GOAL=all"; \
+		echo ".PHONY: all"; \
+		echo "all: $(BINMK).all"; \
+		echo "$(BINMK).all: $${src}"; \
+		echo -e "\\tjavac -d $(BINDIR) $${src}"; \
+		echo -e "\\ttouch \$$@"; \
+		echo ".PHONY: clean"; \
+		echo "clean:"; \
+		echo -e "\\tfind $(BINDIR) ! -path '*/.svn/*' -and -name '*.class' -delete"; \
+	) > $(BINMK)
+
+include ../mk/targets.mk

@@ -1,6 +1,8 @@
 # targets.mk
 #
-# Copyright 2005, 2009 Fernando Silveira <fsilveira@gmail.com>
+# $Id$
+#
+# Copyright (C) 2005-2009 Fernando Silveira <fsilveira@gmail.com>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,17 +33,48 @@
 ifndef targets.mk
 targets.mk=		y
 
+ifdef DEBUG
+	ifeq ($(DEBUG),)
+		mk_DEBUG=n
+	else ifeq ($(DEBUG),n)
+		mk_DEBUG=n
+	else ifeq ($(DEBUG),no)
+		mk_DEBUG=n
+	else ifeq ($(DEBUG),N)
+		mk_DEBUG=n
+	else ifeq ($(DEBUG),NO)
+		mk_DEBUG=n
+	else
+		mk_DEBUG=y
+	endif
+else
+	mk_DEBUG=n
+endif
+
 # C compiler.
-CFLAGS+=		-std=gnu99 -Wall -Werror -Wunused
-#CFLAGS+=		-Wshadow
-ifeq ($(DEBUG),y)
+CFLAGS+=		-std=gnu99 -Wall -Werror -Wunused -fPIC -DPIC
+CFLAGS+=		-Wshadow
+ifeq ($(mk_DEBUG),y)
 CFLAGS+=		-O0 -ggdb3 -DDEBUG
 else
-CFLAGS+=		-O3
+CFLAGS+=		-O2 -DNDEBUG
 endif
 
 # C++ compiler.
-CXXFLAGS=		$(CFLAGS)
+CXXFLAGS+=		-Wall -Werror -Wunused -fPIC -DPIC
+CXXFLAGS+=		-Wshadow
+ifeq ($(mk_DEBUG),y)
+CXXFLAGS+=		-O0 -ggdb3 -DDEBUG
+else
+CXXFLAGS+=		-O2 -DNDEBUG
+endif
+
+# Linker.
+ifeq ($(mk_DEBUG),y)
+LDFLAGS+=		
+else
+LDFLAGS+=		
+endif
 
 # Archiver.
 ARFLAGS=		rcs
@@ -63,12 +96,6 @@ WGET=			wget
 
 LINK.o=			$(CC)
 
-# Directories.
-PREFIX=			/usr/local
-
-SH_PREFIX=		PS4=""; set -ex
-#SH_PREFIX=		:
-
 # Avoid unwanted default goals. The `all' goal must be redefined at the end of
 # this file.
 .PHONY: all
@@ -79,9 +106,11 @@ all:
 .PHONY: no not empty null
 no not empty null:
 
-# override some global definitions
+# override some global rules definitions
 %.c: %.y
-	yacc -d -o $@ $(firstword $^)
+	yacc -d -o $@ $^
+%.c: %.l
+	lex -o $@ $^
 
 
 # global variables
@@ -104,22 +133,61 @@ ifdef SUBDIR
 SUBDIRS+=		$(SUBDIR)
 endif
 
-VPATH+=			$(LIBDIRS)
-
 
 # binaries
 
 define BIN_template
+$(1)_LINK=		$(CC)
+
 define BIN_SRC_template
-ifndef $$(1)_CFLAGS
-$$(1)_CFLAGS=		$$(CFLAGS)
+
+# Read ".depend" file to append dependencies to each object target.
+ifneq ($(wildcard .depend),)
+	# Using $(MAKE) to read file dependencies is TOO MUCH slow. Please use $(AWK).
+	#$$(1)_depend=	$$$$(shell OBJ="$$(notdir $$$$(patsubst %.cpp,%.o,$$$$(1)))"; echo -e ".PHONY: $$$$$$$${OBJ}\\n$$$$$$$${OBJ}:\\n\\t@echo $$$$$$$$^\\n" | make -f - -f .depend)
+	# Faster, but less compatible.
+	$$(1)_depend=	$$$$(shell exec $(AWK) -v OBJ=$$(notdir $$(patsubst %.cpp,%.o,$$(1))) '{ if (/^[^ \t]/) obj = 0; if ($$$$$$$$1 == OBJ":") { obj = 1; $$$$$$$$1 = ""; } else if (!obj) next; if (/\\$$$$$$$$/) sub(/\\$$$$$$$$/, " "); else sub(/$$$$$$$$/, "\n"); printf("%s", $$$$$$$$0); }' .depend)
 endif
-$$(patsubst %.c,%.o,$$(1)):: $$(1) $$$$($$(1)_DEPS)
-	$(CC) $$$$($$(1)_CFLAGS) $$(patsubst %,-I%,$$($(1)_INCDIRS)) $$(patsubst %,-I%,$(INCDIRS)) -c -o $$$$@ $$$$<
+
+ifneq ($$(1),$$(patsubst %.cpp,%.o,$$(1)))
+
+$(1)_LINK=		$(CXX)
+
+ifndef $$(1)_CXXFLAGS
+$$(1)_CXXFLAGS+=	$$($(1)_CXXFLAGS) $$(CXXFLAGS)
+endif
+
+# avoid defining a target more than one time
+ifneq ($$$$(_$$(1)),x)
+$$(patsubst %.cpp,%.o,$$(1)): $$(1) $$$$($$(1)_DEPS) $$$$($$(1)_depend)
+	$(CXX) $$$$($$(1)_CXXFLAGS) $$($(1)_INCDIRS:%=-I%) $$(INCDIRS:%=-I%) -c -o $$$$@ $$$$<
+endif
+
+$(1)_OBJS+=		$$(patsubst %.cpp,%.o,$$(1))
+
+CXX_SRCS+=		$$(1)
+
+else
+
+ifndef $$(1)_CFLAGS
+$$(1)_CFLAGS+=		$$($(1)_CFLAGS) $$(CFLAGS)
+endif
+
+# avoid defining a target more than one time
+ifneq ($$$$(_$$(1)),x)
+$$(patsubst %.c,%.o,$$(1)): $$(1) $$$$($$(1)_DEPS) $$$$($$(1)_depend)
+	$(CC) $$$$($$(1)_CFLAGS) $$($(1)_INCDIRS:%=-I%) $$(INCDIRS:%=-I%) -c -o $$$$@ $$$$<
+endif
 
 $(1)_OBJS+=		$$(patsubst %.c,%.o,$$(1))
+
+C_SRCS+=		$$(1)
+
+endif
+
 endef
 
+_$$(1)=			x
 $$(foreach src,$$($(1)_SRCS),$$(eval $$(call BIN_SRC_template,$$(src))))
 
 define BIN_INCDIR_template
@@ -129,10 +197,6 @@ endef
 
 $$(foreach incdir,$$($(1)_INCDIRS),$$(eval $$(call BIN_INCDIR_template,$$(incdir))))
 
-VPATH+=			$$($(1)_LIBDIRS)
-
-MKDEPARGS+=		$$($(1)_SRCS) # mkdep
-CTAGSARGS+=		$$($(1)_SRCS) # ctags
 endef
 
 $(foreach bin,$(LIBS) $(PROGS),$(eval $(call BIN_template,$(bin))))
@@ -141,13 +205,19 @@ $(foreach bin,$(LIBS) $(PROGS),$(eval $(call BIN_template,$(bin))))
 # libraries
 
 define LIB_template
+ifndef $(1)_LDFLAGS
+$(1)_LDFLAGS+=		$$(LDFLAGS)
+endif
+
 DEFAULT_TARGETS+=	lib$(1).a
 STLIBS+=		lib$(1).a
 lib$(1).a: $$($(1)_OBJS)
+	$(AR) $(ARFLAGS) $$@ $$^
 
 DEFAULT_TARGETS+=	lib$(1).so
 SHLIBS+=		lib$(1).so
-lib$(1).so: $$($(1)_OBJS) $$($(1)_DEPLIBS:%=-l%)
+lib$(1).so: $$($(1)_OBJS)
+	$$($(1)_LINK) $$^ $$($(1)_LIBDIRS:%=-L%) $$($(1)_DEPLIBS:%=-l%) $$(LIBDIRS:%=-L%) $$(DEPLIBS:%=-l%) $$($(1)_LDFLAGS) $$(LDLIBS) -o $$@ -shared
 
 $(1): lib$(1).a lib$(1).so
 
@@ -160,18 +230,16 @@ endef
 $(foreach lib,$(LIBS),$(eval $(call LIB_template,$(lib))))
 
 
-$(STLIBS):
-	$(AR) $(ARFLAGS) $@ $^
-
-$(SHLIBS):
-	$(CC) $^ $(LDFLAGS) -o $@ -shared
-
-
 # programs
 
 define PROG_template
+ifndef $(1)_LDFLAGS
+$(1)_LDFLAGS+=		$$(LDFLAGS)
+endif
+
 DEFAULT_TARGETS+=	$(1)
-$(1): $$($(1)_OBJS) $$($(1)_DEPLIBS:%=-l%)
+$(1): $$($(1)_OBJS)
+	$$($(1)_LINK) $$^ $$($(1)_LIBDIRS:%=-L%) $$($(1)_DEPLIBS:%=-l%) $$(LIBDIRS:%=-L%) $$(DEPLIBS:%=-l%) $$($(1)_LDFLAGS) $$(LDLIBS) -o $$@
 
 CLEAN_TARGETS+=	$(1)_clean
 DISTCLEAN_TARGETS+=	$(1)_clean
@@ -180,9 +248,6 @@ $(1)_clean:
 endef
 
 $(foreach prog,$(PROGS),$(eval $(call PROG_template,$(prog))))
-
-$(PROGS):
-	$(LINK.o) $^ $(LDLIBS) -o $@
 
 
 # subdirectories
@@ -215,15 +280,20 @@ $(foreach subdir,$(SUBDIRS),$(eval $(call SUBDIR_template,$(subdir))))
 all: $(DEFAULT_TARGETS)
 install: $(INSTALL_TARGETS)
 clean: $(CLEAN_TARGETS)
-distclean: $(DISTCLEAN_TARGETS)
+distclean: $(CLEAN_TARGETS) $(DISTCLEAN_TARGETS)
 
 .PHONY: dep
 dep:
-	$(MKDEP) $(CFLAGS) $(MKDEPARGS)
+ifneq ($(CXX_SRCS),)
+	$(MKDEP) $(CXXFLAGS) $(MKDEPARGS) $(CXX_SRCS)
+endif
+ifneq ($(C_SRCS),)
+	$(MKDEP) $(CFLAGS) $(MKDEPARGS) $(C_SRCS)
+endif
 
 .PHONY: tags
 tags:
-	$(CTAGS) -R $(CTAGSARGS)
+	$(CTAGS) -R $(CTAGSARGS) $(C_SRCS) $(CXX_SRCS)
 
 -include .depend
 

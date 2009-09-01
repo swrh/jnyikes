@@ -28,6 +28,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,7 +36,7 @@
 
 #include <jni.h>
 
-#include "pjni.h"
+#include "jyo.h"
 
 #include "interface.h"
 
@@ -111,7 +112,8 @@ l_thread(void *param)
 	/* Load JVM data pointer. */
 	jvm = thrp->jvm;
 	if (jvm == NULL) {
-		fprintf(stderr, "%s(%p); Received an invalid JVM pointer.\n", __func__, param);
+		fprintf(stderr, "%s(%p); Received an invalid JVM pointer.\n",
+		    __func__, param);
 		fflush(stderr);
 
 		/* Reduce our global thread counter. */
@@ -122,12 +124,13 @@ l_thread(void *param)
 		return NULL;
 	}
 
-	/* Conecta a thread atual à máquina virtual Java. */
+	/* Attach this thread to the JVM. */
 	memset(&thr_args, 0, sizeof(JavaVMAttachArgs));
 	thr_args.version = JNI_VERSION_1_2;
 	thr_args.name = "CCorte";
 	if ((*jvm)->AttachCurrentThread(jvm, (void *)&jenv, &thr_args) < 0) {
-		fprintf(stderr, "%s(%p); Error while attaching current thread to the JVM.\n", __func__, param);
+		fprintf(stderr, "%s(%p); Error while attaching current thread "
+		    "to the JVM.\n", __func__, param);
 		fflush(stderr);
 
 		/* Reduce our global thread counter. */
@@ -146,9 +149,10 @@ l_thread(void *param)
 	g_thread_running--;
 	(void)pthread_mutex_unlock(&g_thread_mutex);
 
-	/* Descarrega as configurações do Java. */
+	/* Dettach this thread from the JVM. */
 	if ((*jvm)->DetachCurrentThread(jvm) < 0) {
-		fprintf(stderr, "%s(%p); Error while dettaching current thread from the JVM.\n", __func__, param);
+		fprintf(stderr, "%s(%p); Error while dettaching current "
+		    "thread from the JVM.\n", __func__, param);
 		fflush(stderr);
 	}
 

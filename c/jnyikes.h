@@ -28,52 +28,18 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined(_POBJECT_H_)
-#define _POBJECT_H_
+#if !defined(_JNYIKES_H_)
+#define _JNYIKES_H_
 
-#define bool jboolean
-#define TRUE JNI_TRUE
-#define FALSE JNI_FALSE
+#include <jni.h>
 
-/*
-#if defined(DEBUG) && !defined(NDEBUG)
-
-#include <assert.h>
-
-#define POBJECT_ASSERT_RETURN(expr, retval) assert(expr)
-#define POBJECT_ASSERT(expr) assert(expr)
-#elif defined(DEBUG)
-#define POBJECT_ASSERT(expr) do {					\
-	if (!(expr)) {							\
-		fprintf(stderr, "PJNI: Erro interno em %s:%d: \"%s\".",	\
-		    __FILE__, __LINE__, #expr);				\
-		return;							\
-	}								\
-} while (0)
-#define POBJECT_ASSERT_RETURN(expr, retval) do {			\
-	if (!(expr)) {							\
-		fprintf(stderr, "PJNI: Erro interno em %s:%d: \"%s\".",	\
-		    __FILE__, __LINE__, #expr);				\
-		return retval;						\
-	}								\
-} while (0)
-#else
-#define POBJECT_ASSERT(expr) do {					\
-	if (!(expr)) {							\
-		return;							\
-	}								\
-} while (0)
-#define POBJECT_ASSERT_RETURN(expr, retval) do {			\
-	if (!(expr)) {							\
-		return retval;						\
-	}								\
-} while (0)
-#endif
-*/
+typedef jboolean jy_bool;
+#define JY_TRUE JNI_TRUE
+#define JY_FALSE JNI_FALSE
 
 #if defined(DEBUG)
 
-#define PJNI_ASSERT_RETURN(cond, ret) do {				\
+#define JY_ASSERT_RETURN(cond, ret) do {				\
 	if (!(cond)) {							\
 		fprintf(stderr, "%s:%d: %s: Assertion `%s' failed. "	\
 		    "Returning `%s'.\n",				\
@@ -83,7 +49,7 @@
 	}								\
 } while (0)
 
-#define PJNI_ASSERT_RETURN_VOID(cond)  do {				\
+#define JY_ASSERT_RETURN_VOID(cond)  do {				\
 	if (!(cond)) {							\
 		fprintf(stderr, "%s:%d: %s: Assertion `%s' failed. "	\
 		    "Returning.\n",					\
@@ -93,25 +59,40 @@
 	}								\
 } while (0)
 
-#define POBJECT_WARN_ENOSYS() do {					\
-	printf("%s:%d: POBJECT_ERROR_ENOSYS\n", __FILE__, __LINE__);	\
+#define JY_WARN_ENOSYS() do {					\
+	printf("%s:%d: JY_ERR_ENOSYS\n", __FILE__, __LINE__);	\
 	fflush(stdout);							\
 } while (0)
 
 #else
 
-#define PJNI_ASSERT_RETURN(cond, ret) do {				\
+#define JY_ASSERT_RETURN(cond, ret) do {				\
 	if (!(cond))							\
 		return (ret);						\
 } while (0)
 
-#define PJNI_ASSERT_RETURN_VOID(cond)  do {				\
+#define JY_ASSERT_RETURN_VOID(cond)  do {				\
 	if (!(cond))							\
 		return;							\
 } while (0)
 
-#define POBJECT_WARN_ENOSYS() do { } while (0)
+#define JY_WARN_ENOSYS() do { } while (0)
 
 #endif
 
-#endif /* !defined(_POBJECT_H_) */
+enum e_jy_err {
+	JY_ESUCCESS	=   0,
+	JY_EINTERNAL	=  -1, /*!< Internal error. */
+	JY_EENOMEM	=  -2, /*!< Could not allocate memory. */
+	JY_EEINVAL	=  -3, /*!< Invalid argument. */
+	JY_EEDEADLK	=  -4, /*!< Dead lock. */
+	JY_EENOSYS	=  -5, /*!< Function not implemented. */
+	JY_ENOJCLASS	=  -6, /*!< Inexistent class. */
+	JY_ENOTFOUND	=  -7, /*!< Not found. */
+	JY_EEXCEPTION	=  -8, /*!< Exception caught. */
+};
+
+/** XXX Retorna os nomes dos erros. */
+const char *jy_strerror(enum e_jy_err t);
+
+#endif /* !defined(_JNYIKES_H_) */

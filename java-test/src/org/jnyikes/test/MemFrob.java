@@ -28,17 +28,31 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "pjni.h"
+package org.jnyikes.test;
 
-static int
-app_main(JavaVM *jvm, JNIEnv *jenv)
-{
-	return 0;
-}
+import org.jnyikes.JNyIkes;
 
-int
-main(void)
-{
-	start_thread(app_main);
-	return 0;
+/**
+ * Data frobnicator.
+ *
+ * This class is just an example for the jnyikes library.
+ * memfrob(3)
+ */
+public class MemFrob {
+	private static JNyIkes jy = null;
+
+	int fdFrob = -1;
+
+	public MemFrob() {
+		if (jy == null)
+			jy = new JNyIkes();
+		//jy.loadNativeFunction("jymemfrob");
+	}
+
+	public String frobnicate(String str) {
+		if (fdFrob == -1)
+			return null;
+
+		return null;
+	}
 }

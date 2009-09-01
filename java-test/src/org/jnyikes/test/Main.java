@@ -28,15 +28,26 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined(_INTERFACE_H_)
-#define _INTERFACE_H_
+package org.jnyikes.test;
 
-/*
- * As aplicações que forem utilizar esta biblioteca terão que se ligar também
- * à bilioteca de "signal chaining" do Java ("jsig" e "jvm"). Para maiores
- * informações veja a seguinte página:
- *
- * http://java.sun.com/j2se/1.4.2/docs/guide/vm/signal-chaining.html
- */
- 
-#endif /* !defined(_INTERFACE_H_) */
+import org.jnyikes.JNyIkes;
+
+public class Main {
+	public static void main(String args[]) {
+		String func = "org.jnyikes.test.Main";
+
+		int ret;
+
+		System.out.print(func + ": JNyIkes.load()");
+		JNyIkes.load();
+		System.out.println(";");
+
+		/*
+		System.out.print(func + ": JNyIkes.sendString(\"test\")");
+		ret = JNyIkes.sendString("test");
+		System.out.println(" = " + ret + ";");
+		if (ret != 0)
+			System.exit(1);
+			*/
+	}
+}

@@ -28,16 +28,39 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-LIB=		jnyikes
-SRCS=		llist.c pobject.c interface.c
-
 include ../config.mk
 
-INCDIRS=	$(JAVADIR)/include $(JAVADIR)/include/linux
-DEPLIBS=	pthread
+SRCDIR=		src
+BINDIR=		bin
+CLASSPATH=	../java/bin
+BINMK=		$(BINDIR)/.mk
 
-CFLAGS+=	-D_REENTRANT -Wmissing-prototypes \
-		-I$(JAVADIR)/include \
-		-I$(JAVADIR)/include/linux
+.PHONY: all
+all: $(BINMK)
+	@$(MAKE) -f $(BINMK) $@
+
+.PHONY: clean
+clean:
+	$(RM) -r $(BINDIR)
+
+# This target will create a temporary Makefile which will include all ".java"
+# files found under $(SRCDIR) directory.
+$(BINMK): $(shell find $(SRCDIR) ! -path '*/.svn/*' -and -name '*.java')
+	$(MKDIR) -p $(BINDIR)
+	@echo "find $(SRCDIR) > $(BINMK)"; \
+		( \
+		set -e; \
+		src="$^"; \
+		echo "# $(BINMK)"; \
+		echo ".DEFAULT_GOAL=all"; \
+		echo ".PHONY: all"; \
+		echo "all: $(BINMK).all"; \
+		echo "$(BINMK).all: $${src}"; \
+		echo -e "\\tjavac -classpath $(CLASSPATH) -d $(BINDIR) $${src}"; \
+		echo -e "\\ttouch \$$@"; \
+		echo ".PHONY: clean"; \
+		echo "clean:"; \
+		echo -e "\\tfind $(BINDIR) ! -path '*/.svn/*' -and -name '*.class' -delete"; \
+	) > $(BINMK)
 
 include ../mk/targets.mk

@@ -28,11 +28,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-SUBDIRS=	src test jsrc
+SUBDIRS=	java c java-test
 
 ifeq ($(wildcard config.mk),)
 $(error Please create a config.mk file based on config-example.mk)
 endif
-
 include config.mk
+
 include mk/targets.mk

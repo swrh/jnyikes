@@ -28,15 +28,29 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-PROG=		test
-SRCS=		main.c
+LIB=		jnyikes
+SRCS=		jnyikes.c llist.c jyo.c interface.c org_jnyikes_JNyIkes.c
 
 include ../config.mk
 
-INCDIRS=	../src $(JAVADIR)/include $(JAVADIR)/include/linux
-LIBDIRS=	../src
-DEPLIBS=	jnyikes
+INCDIRS=	$(JAVADIR)/include $(JAVADIR)/include/linux
+DEPLIBS=	pthread
 
-CFLAGS+=	-D_REENTRANT -Wmissing-prototypes
+CFLAGS+=	-D_REENTRANT -Wmissing-prototypes \
+		-I$(JAVADIR)/include \
+		-I$(JAVADIR)/include/linux
+
+JY_JSRCDIR=	../java
+JY_JAVABINDIR=	$(JY_JSRCDIR)/bin
+
+org_jnyikes_JNyIkes.c: org_jnyikes_JNyIkes.h
+	touch $@
+
+org_jnyikes_JNyIkes.h: $(JY_JAVABINDIR)/org/jnyikes/JNyIkes.class
+	$(RM) $@
+	javah -classpath $(JY_JAVABINDIR) org.jnyikes.JNyIkes
+
+$(JY_JAVABINDIR)/org/jnyikes/JNyIkes.class:
+	$(MAKE) -C $(JY_JSRCDIR) all
 
 include ../mk/targets.mk
