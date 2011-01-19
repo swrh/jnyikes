@@ -1,0 +1,14 @@
+Ever tried to access Java objects from a C/C++ thread using JNI? Have you ever
+lost plenty of time on JNI documentation just to get a simple data from your
+Java software from inside a C/C++ library? Do you have no time to write a
+simple Java API for your implemented device driver? Try jnyikes.
+
+'jnyikes' is a middleware for those Java or C/C++ developers who needs to
+transfer data from one side to the other but have no time to learn all the JNI
+details. It will wrap all the JNI details and hard coding stuff by providing
+easy C/C++ and Java functions, objects and methods. Its documentation tends to
+teach programmers by example and is very intuitive, not needing any JNI
+expertise to accomplish almost all common developing objectives.
+
+Java and C deloppers will be very happy to use it when they realize it is not
+needed to read pages and pages of JNI documentation with 'jnyikes'.
