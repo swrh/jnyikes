@@ -29,7 +29,7 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 LIB=		jnyikes
-SRCS=		jnyikes.c llist.c jyo.c interface.c org_jnyikes_JNyIkes.c
+SRCS=		jnyikes.c llist.c jyo.c interface.c com_github_swrh_jnyikes_JNyIkes.c
 
 include ../config.mk
 
@@ -43,14 +43,14 @@ CFLAGS+=	-D_REENTRANT -Wmissing-prototypes \
 JY_JSRCDIR=	../java
 JY_JAVABINDIR=	$(JY_JSRCDIR)/bin
 
-org_jnyikes_JNyIkes.c: org_jnyikes_JNyIkes.h
+com_github_swrh_jnyikes_JNyIkes.c: com_github_swrh_jnyikes_JNyIkes.h
 	touch $@
 
-org_jnyikes_JNyIkes.h: $(JY_JAVABINDIR)/org/jnyikes/JNyIkes.class
+com_github_swrh_jnyikes_JNyIkes.h: $(JY_JAVABINDIR)/com/github/swrh/jnyikes/JNyIkes.class
 	$(RM) $@
-	javah -classpath $(JY_JAVABINDIR) org.jnyikes.JNyIkes
+	javah -classpath $(JY_JAVABINDIR) com.github.swrh.jnyikes.JNyIkes
 
-$(JY_JAVABINDIR)/org/jnyikes/JNyIkes.class:
+$(JY_JAVABINDIR)/com/github/swrh/jnyikes/JNyIkes.class:
 	$(MAKE) -C $(JY_JSRCDIR) all
 
 include ../mk/targets.mk

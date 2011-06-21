@@ -28,9 +28,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.jnyikes.test;
+package com.github.swrh.jnyikes.test;
 
-import org.jnyikes.JNyIkes;
+import com.github.swrh.jnyikes.JNyIkes;
 
 /**
  * Data frobnicator.

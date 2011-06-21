@@ -28,17 +28,28 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "org_jnyikes_JNyIkes.h"
+package com.github.swrh.jnyikes;
 
-/**
- * This method is called when the java side is sending us a POJO.
- *
- * @param jobject The POJO.
- *
- * @return Zero.
- */
-JNIEXPORT jint JNICALL
-Java_org_jnyikes_JNyIkes_j2n(JNIEnv *jenv, jclass jcls, jobject jobj)
-{
-	return (jint)0;
+public class JNyIkes {
+	/**
+	 * Send a POJO to the native side.
+	 *
+	 * @param o The POJO.
+	 */
+	native public static int j2n(Object o);
+
+	public static void load() {
+		System.loadLibrary("jnyikes");
+	}
+
+	/**
+	 * This method is called when the native side is sending us a POJO.
+	 *
+	 * @param o The POJO.
+	 *
+	 * @return Zero.
+	 */
+	public static int n2j(Object o) {
+		return 0;
+	}
 }

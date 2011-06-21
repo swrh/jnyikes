@@ -28,26 +28,17 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.jnyikes.test;
+#include "com_github_swrh_jnyikes_JNyIkes.h"
 
-import org.jnyikes.JNyIkes;
-
-public class Main {
-	public static void main(String args[]) {
-		String func = "org.jnyikes.test.Main";
-
-		int ret;
-
-		System.out.print(func + ": JNyIkes.load()");
-		JNyIkes.load();
-		System.out.println(";");
-
-		/*
-		System.out.print(func + ": JNyIkes.sendString(\"test\")");
-		ret = JNyIkes.sendString("test");
-		System.out.println(" = " + ret + ";");
-		if (ret != 0)
-			System.exit(1);
-			*/
-	}
+/**
+ * This method is called when the java side is sending us a POJO.
+ *
+ * @param jobject The POJO.
+ *
+ * @return Zero.
+ */
+JNIEXPORT jint JNICALL
+Java_com_github_swrh_jnyikes_JNyIkes_j2n(JNIEnv *jenv, jclass jcls, jobject jobj)
+{
+	return (jint)0;
 }
