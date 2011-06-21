@@ -156,7 +156,7 @@ l_thread(void *param)
 		fflush(stderr);
 	}
 
-	return (void *)ret;
+	return (void *)(long int)ret;
 }
 
 /**
