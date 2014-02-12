@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2011 Fernando Silveira <fsilveira@gmail.com>
+ * Copyright 2005-2012 Fernando Silveira <fsilveira@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,31 +28,28 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.github.swrh.jnyikes.test;
+package com.googlecode.jnyikes;
 
-import com.github.swrh.jnyikes.JNyIkes;
+public class JNyIkes {
+	/**
+	 * Send a POJO to the native side.
+	 *
+	 * @param o The POJO.
+	 */
+	native public static int j2n(Object o);
 
-/**
- * Data frobnicator.
- *
- * This class is just an example for the jnyikes library.
- * memfrob(3)
- */
-public class MemFrob {
-	private static JNyIkes jy = null;
-
-	int fdFrob = -1;
-
-	public MemFrob() {
-		if (jy == null)
-			jy = new JNyIkes();
-		//jy.loadNativeFunction("jymemfrob");
+	public static void load() {
+		System.loadLibrary("jnyikes");
 	}
 
-	public String frobnicate(String str) {
-		if (fdFrob == -1)
-			return null;
-
-		return null;
+	/**
+	 * This method is called when the native side is sending us a POJO.
+	 *
+	 * @param o The POJO.
+	 *
+	 * @return Zero.
+	 */
+	public static int n2j(Object o) {
+		return 0;
 	}
 }

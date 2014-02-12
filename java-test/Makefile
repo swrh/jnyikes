@@ -1,6 +1,6 @@
 # Makefile
 #
-# Copyright 2005-2011 Fernando Silveira <fsilveira@gmail.com>
+# Copyright 2005-2012 Fernando Silveira <fsilveira@gmail.com>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -56,11 +56,11 @@ $(BINMK): $(shell find $(SRCDIR) ! -path '*/.svn/*' -and -name '*.java')
 		echo ".PHONY: all"; \
 		echo "all: $(BINMK).all"; \
 		echo "$(BINMK).all: $${src}"; \
-		echo -e "\\tjavac -classpath $(CLASSPATH) -d $(BINDIR) $${src}"; \
-		echo -e "\\ttouch \$$@"; \
+		echo "	javac -classpath $(CLASSPATH) -d $(BINDIR) $${src}"; \
+		echo "	touch \$$@"; \
 		echo ".PHONY: clean"; \
 		echo "clean:"; \
-		echo -e "\\tfind $(BINDIR) ! -path '*/.svn/*' -and -name '*.class' -delete"; \
+		echo "	find $(BINDIR) ! -path '*/.svn/*' -and -name '*.class' -delete"; \
 	) > $(BINMK)
 
 include ../mk/targets.mk

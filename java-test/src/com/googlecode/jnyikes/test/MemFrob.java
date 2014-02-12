@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2011 Fernando Silveira <fsilveira@gmail.com>
+ * Copyright 2005-2012 Fernando Silveira <fsilveira@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,26 +28,31 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.github.swrh.jnyikes.test;
+package com.googlecode.jnyikes.test;
 
-import com.github.swrh.jnyikes.JNyIkes;
+import com.googlecode.jnyikes.JNyIkes;
 
-public class Main {
-	public static void main(String args[]) {
-		String func = "com.github.swrh.jnyikes.test.Main";
+/**
+ * Data frobnicator.
+ *
+ * This class is just an example for the jnyikes library.
+ * memfrob(3)
+ */
+public class MemFrob {
+	private static JNyIkes jy = null;
 
-		int ret;
+	int fdFrob = -1;
 
-		System.out.print(func + ": JNyIkes.load()");
-		JNyIkes.load();
-		System.out.println(";");
+	public MemFrob() {
+		if (jy == null)
+			jy = new JNyIkes();
+		//jy.loadNativeFunction("jymemfrob");
+	}
 
-		/*
-		System.out.print(func + ": JNyIkes.sendString(\"test\")");
-		ret = JNyIkes.sendString("test");
-		System.out.println(" = " + ret + ";");
-		if (ret != 0)
-			System.exit(1);
-			*/
+	public String frobnicate(String str) {
+		if (fdFrob == -1)
+			return null;
+
+		return null;
 	}
 }

@@ -1,6 +1,6 @@
 # Makefile
 #
-# Copyright 2005-2011 Fernando Silveira <fsilveira@gmail.com>
+# Copyright 2005-2012 Fernando Silveira <fsilveira@gmail.com>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 LIB=		jnyikes
-SRCS=		jnyikes.c llist.c jyo.c interface.c com_github_swrh_jnyikes_JNyIkes.c
+SRCS=		jnyikes.c llist.c jyo.c interface.c com_googlecode_jnyikes_JNyIkes.c
 
 include ../config.mk
 
@@ -43,14 +43,14 @@ CFLAGS+=	-D_REENTRANT -Wmissing-prototypes \
 JY_JSRCDIR=	../java
 JY_JAVABINDIR=	$(JY_JSRCDIR)/bin
 
-com_github_swrh_jnyikes_JNyIkes.c: com_github_swrh_jnyikes_JNyIkes.h
+com_googlecode_jnyikes_JNyIkes.c: com_googlecode_jnyikes_JNyIkes.h
 	touch $@
 
-com_github_swrh_jnyikes_JNyIkes.h: $(JY_JAVABINDIR)/com/github/swrh/jnyikes/JNyIkes.class
+com_googlecode_jnyikes_JNyIkes.h: $(JY_JAVABINDIR)/com/googlecode/jnyikes/JNyIkes.class
 	$(RM) $@
-	javah -classpath $(JY_JAVABINDIR) com.github.swrh.jnyikes.JNyIkes
+	javah -classpath $(JY_JAVABINDIR) com.googlecode.jnyikes.JNyIkes
 
-$(JY_JAVABINDIR)/com/github/swrh/jnyikes/JNyIkes.class:
+$(JY_JAVABINDIR)/com/googlecode/jnyikes/JNyIkes.class:
 	$(MAKE) -C $(JY_JSRCDIR) all
 
 include ../mk/targets.mk

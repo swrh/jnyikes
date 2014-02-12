@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2011 Fernando Silveira <fsilveira@gmail.com>
+ * Copyright 2005-2012 Fernando Silveira <fsilveira@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "com_github_swrh_jnyikes_JNyIkes.h"
+#include "com_googlecode_jnyikes_JNyIkes.h"
 
 /**
  * This method is called when the java side is sending us a POJO.
@@ -38,7 +38,7 @@
  * @return Zero.
  */
 JNIEXPORT jint JNICALL
-Java_com_github_swrh_jnyikes_JNyIkes_j2n(JNIEnv *jenv, jclass jcls, jobject jobj)
+Java_com_googlecode_jnyikes_JNyIkes_j2n(JNIEnv *jenv, jclass jcls, jobject jobj)
 {
 	return (jint)0;
 }
