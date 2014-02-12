@@ -2,7 +2,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2005-2012 Fernando Silveira <fsilveira@gmail.com>
+# Copyright (C) 2005-2014 Fernando Silveira <fsilveira@gmail.com>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
