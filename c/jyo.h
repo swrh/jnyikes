@@ -54,47 +54,44 @@ enum e_jyo_type {
 };
 
 /**
- * XXX
+ * Data structure used in the creation of Java objects.
  *
- * Estrutura de dados utilizada na criação de objetos Java.
- *
- * Esta estrutura não deve ser acessada diretamente, mas sim utilizando as
- * APIs jyo (jyo_init(), jyo_append(), jyo_send()).
+ * This structure should be used using the jyo APIs (jyo_init(), jyo_append(),
+ * jyo_send()) and not directly.
  */
 struct st_jyo {
-	/** XXX Classe Java do objeto. */
+	/** The Java class. */
 	char *clazz;
 
-	/** XXX Lista ligada de propriedades do objeto. */
+	/** The object properties contained in a linked list. */
 	struct st_jyo_property_ll *properties;
 
 	/**
-	 * XXX Indicador de erro. Caso esta variável seja diferente de
-	 * "JY_ESUCCESS", nenhuma API aceitará esta estrutura como
-	 * parâmetro e todas retornarão um valor de erro, ou seja, ela deverá
-	 * ser liberada imediatamente com a função jyo_free().
+	 * Error indicator. If this variable is different than "JY_ESUCCESS",
+	 * no API will ever accept this structure as a parameter and all will
+	 * return an error value/state. In this case it should be freed
+	 * immediately using the jyo_free() function.
 	 */
 	enum e_jy_err error;
 };
 
 struct st_jyo_property {
 	/**
-	 * XXX Indicador de dado alocado dinamicamente. Caso seja JNI_TRUE, a
-	 * função jyo_free() irá rodar o free() no ponteiro data ao
-	 * liberar esta estrutura.
+	 * Dynamically allocated data flag. If this variable is JNI_TRUE, the
+	 * jyo_free() function will free(3) this structure.
 	 */
 	jboolean freeme;
 
-	/** XXX Método "setter" do objeto Java à ser chamado. */
+	/** The setter method name of the Java object to be called. */
 	char *method_name;
 #if 0
-	/** XXX Campo do objeto Java à ser configurado. */
-	char *field; /* XXX TODO implementar */
+	/** The Java object field to be configured. */
+	char *field; /* XXX TODO: implement. */
 #endif
 
-	/** XXX Tipo do dado contido no nó. */
+	/** The type of the data contained in this node. */
 	enum e_jyo_type data_type;
-	/** XXX Dado do nó. */
+	/** The data of this node. */
 	void *data;
 };
 
@@ -104,97 +101,120 @@ struct st_jyo_property_ll {
 };
 
 /**
- * XXX Inicializa a biblioteca jnyikes.
- * @param version A versão da biblioteca jnyikes.
+ * Initialize the jnyikes library.
+ * @param version The version which the application expects.
  */
 jboolean jnyikes_init(unsigned int version);
 
 /**
- * XXX Emite uma exception.
- * @param clazz A classe da exception.
+ * Throws/emits an exception.
+ * @param clazz The exception class.
  */
 void jnyikes_throw(char *clazz);
 
-/** XXX Retorna os nomes dos tipos. */
+/**
+ * Returns the string description of a type.
+ */
 const char *jyo_get_type_name(enum e_jyo_type t);
 
 /**
- * XXX Inicializa uma estrutura "st_jyo".
+ * Initializes a "st_jyo" struct.
  *
- * Esta função deve ser utilizada antes de configurar as propriedades do objeto.
+ * This functions should be used before setting up the object properties.
  *
- * @param o Ponteiro para a estrutura "st_jyo".
- * @param clazz Nome da classe à ser criada.
+ * @param o The pointer to the "st_jyo" struct.
+ * @param clazz The name of the class to be created.
  *
- * @return Um valor do enumerador "e_jy_err".
+ * @return A "e_jy_err" error code.
  */
 int jyo_init(struct st_jyo *o, char *clazz);
 
 /**
- * XXX Configura a propriedade de uma estrutura "st_jyo".
+ * Sets up the property of an "st_jyo" struct.
  *
- * @param o Ponteiro para a estrutura "st_jyo".
- * @param setter Nome da propriedade à ser configurada.
- * @param data_type Enumerador do tipo de dado da propriedade à ser configurada.
- * @param data Ponteiro para o dado da configuração. TODO comentar sobre string
+ * @param o The pointer to the "st_jyo" struct.
+ * @param setter The name of the property to be set.
+ * @param data_type The data type enum of the data to be set.
+ * @param data The pointer to the data to be set.
  *
- * @return -1 em caso de erro e 0 para sucesso.
+ * @return -1 in case of error and 0 for success.
  */
 int jyo_set_property(struct st_jyo *p, const char *setter, enum e_jyo_type data_type, const void *orig_data);
 
 /**
- * XXX Pega a propriedade de uma estrutura "st_jyo".
+ * Gets the pointer of the data of a "st_jyo" struct returned by "getter".
  *
- * @param o Ponteiro para a estrutura "st_jyo".
- * @param getter Nome da propriedade à ser configurada.
- * @param data_type Enumerador do tipo de dado da propriedade à ser configurada.
- * @param data Ponteiro para o dado da configuração. TODO comentar sobre string
+ * @param o The pointer to the "st_jyo" struct.
+ * @param getter Name of the property to be fetched.
+ * @param data_type The data type enum of the data.
+ * @param data The variable where the pointer will be returned.
  *
- * @return -1 em caso de erro e 0 para sucesso.
+ * @return -1 in case of error and 0 for success.
  */
-/* XXX passa soh o ponteiro */
 int jyo_get_property(struct st_jyo *o, char *getter, enum e_jyo_type data_type, void **data);
-/* XXX duplica os dados (aloca memoria) */
+
+/**
+ * Duplicates the data of a "st_jyo" struct returned by "getter".
+ *
+ * @param o The pointer to the "st_jyo" struct.
+ * @param getter Name of the property to be fetched.
+ * @param data_type The data type enum of the data to be read.
+ * @param buf The pointer where the data will be duplicated.
+ *
+ * @return -1 in case of error and 0 for success.
+ */
 int jyo_get_property_copy(struct st_jyo *o, char *getter, enum e_jyo_type data_type, void **buf);
-/* XXX grava no buffer passado */
+
+/**
+ * Reads the data of a "st_jyo" struct returned by "getter" into a passed buffer.
+ *
+ * @param o The pointer to the "st_jyo" struct.
+ * @param getter Name of the property to be fetched.
+ * @param data_type The data type enum of the data to be read.
+ * @param data The pointer of the buffer to store the data.
+ * @param data_size The size of the "data" buffer.
+ *
+ * @return -1 in case of error and 0 for success.
+ */
 int jyo_get_property_buf(struct st_jyo *o, char *getter, enum e_jyo_type data_type, void *data, size_t data_size);
 
 /**
- * XXX Converte a estrutura "st_jyo" em um objeto Java (jobject) e o envia à uma função estática de uma classe Java.
+ * Converts the "st_jyo" struct to a Java object (jobject) and send it to a
+ * Java static method of a defined class.
  *
- * @param o Ponteiro para a estrutura "st_jyo".
- * @param clazz Nome da classe receptora.
- * @param method Nome do método receptor.
+ * @param o Pointer to the "st_jyo" struct.
+ * @param clazz Name of the receiving class.
+ * @param method Name of the receiving method.
  *
- * @return -1 em caso de erro e 0 para sucesso.
+ * @return -1 in case of error and 0 for success.
  */
 int jyo_send(JNIEnv *jenv, struct st_jyo *p, const char *clazz, const char *method);
 
 /**
- * XXX Libera (desaloca) a estrutura de dados "st_jyo".
+ * Free the "st_jyo" struct.
  *
- * @param o Ponteiro para a estrutura "st_jyo".
+ * @param o Pointer to the "st_jyo" struct.
  */
 void jyo_free(struct st_jyo *o);
 
 /**
- * XXX Verifica o estado de erro ocorrido na estrutura "st_jyo".
+ * Gets the error state ocurred with the "st_jyo" struct.
  *
- * @return Um valor do enumerador "e_jy_err".
+ * @return The "e_jy_err" error enumerator.
  */
 int jyo_error(struct st_jyo *o);
 
 /**
- * XXX Converte uma estrutura "st_jyo" em uma "jobject".
+ * Converts an "st_jyo" struct into a "jobject".
  *
- * @return Um valor do enumerador "e_jy_err".
+ * @return The "e_jy_err" error enumerator.
  */
 int jyo_p2j(JNIEnv *jenv, struct st_jyo *p, jobject *j);
 
 /**
- * XXX Converte uma estrutura "jobject" em uma "st_jyo".
+ * Converts a "jobject" into an "st_jyo" struct.
  *
- * @return Um valor do enumerador "e_jy_err".
+ * @return The "e_jy_err" error enumerator.
  */
 int jyo_j2p(JNIEnv *jenv, jobject j, struct st_jyo *p);
 

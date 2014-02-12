@@ -90,10 +90,12 @@ jyo_free_method_ll(struct st_method_ll **mll)
 }
 
 /*
- * XXX Funções de liberação de memória.
+ * Memory freeing functions.
  */
 
-/** XXX Libera uma estrutura de propriedade. */
+/**
+ * Free a property struct.
+ */
 static void
 jyo_property_free(struct st_jyo_property *p)
 {
@@ -110,7 +112,9 @@ jyo_property_free(struct st_jyo_property *p)
 	}
 }
 
-/** XXX Libera a lista ligada de propriedades. */
+/**
+ * Free a linked list of properties.
+ */
 static void
 jyo_property_ll_free(struct st_jyo_property_ll **head_ll)
 {
@@ -121,17 +125,21 @@ jyo_property_ll_free(struct st_jyo_property_ll **head_ll)
 	if (*head_ll == NULL)
 		return;
 
-	/* XXX Libera o conteudo de cada "st_property". */
+	/* Free the contents of each "st_property". */
 	for (p_ll = *head_ll; p_ll != NULL;
 	    p_ll = (struct st_jyo_property_ll *)p_ll->ll.next) {
 		jyo_property_free(&p_ll->st);
 	}
 
-	/* XXX Destroi a lista ligada. */
+	/* Destroy the linked list. */
 	lldestroy((void **)head_ll);
 }
 
-/** XXX Libera toda a estrutura "st_jyo". */
+/**
+ * Free the "st_jyo" struct.
+ *
+ * @param o Pointer to the "st_jyo" struct.
+ */
 void
 jyo_free(struct st_jyo *p)
 {
@@ -147,7 +155,16 @@ jyo_free(struct st_jyo *p)
 	p->error = JY_ESUCCESS;
 }
 
-/** XXX Inicializa uma estrutura "st_jyo". */
+/**
+ * Initializes a "st_jyo" struct.
+ *
+ * This functions should be used before setting up the object properties.
+ *
+ * @param o The pointer to the "st_jyo" struct.
+ * @param clazz The name of the class to be created.
+ *
+ * @return A "e_jy_err" error code.
+ */
 int
 jyo_init(struct st_jyo *p, char *clazz)
 {
@@ -166,10 +183,13 @@ jyo_init(struct st_jyo *p, char *clazz)
 
 
 /*
- * XXX Funções de uso geral.
+ * General usage functions.
  */
 
-/** XXX Retorna o tamanho de um tipo de dado "e_jyo_type". */
+/**
+ * Calculates the size ocupied by the type specified by the "t" parameter.
+ * @param t The type to be "measured".
+ */
 static size_t
 jyo_get_type_size(enum e_jyo_type t)
 {
@@ -204,7 +224,9 @@ jyo_get_type_size(enum e_jyo_type t)
 	}
 }
 
-/** XXX Retorna os nomes dos tipos. */
+/**
+ * Returns the string description of a type.
+ */
 const char *
 jyo_get_type_name(enum e_jyo_type t)
 {
@@ -230,8 +252,15 @@ jyo_get_type_name(enum e_jyo_type t)
 #undef CASE_NAME
 }
 
-/*
- * XXX Adiciona propriedade "method name" na lista "p->proprierties", com o dado "orig_data"
+/**
+ * Sets up the property of an "st_jyo" struct.
+ *
+ * @param o The pointer to the "st_jyo" struct.
+ * @param setter The name of the property to be set.
+ * @param data_type The data type enum of the data to be set.
+ * @param data The pointer to the data to be set.
+ *
+ * @return -1 in case of error and 0 for success.
  */
 int
 jyo_set_property(struct st_jyo *p, const char *method_name, enum e_jyo_type data_type, const void *orig_data)
@@ -247,7 +276,7 @@ jyo_set_property(struct st_jyo *p, const char *method_name, enum e_jyo_type data
 		return JY_EEINVAL;
 
 	/*
-	 * XXX verifica o tamanho do orig_data
+	 * Checks the size of "orig_data".
 	 */
 	if (data_type == JYO_TSTRING) {
 		if (orig_data != NULL) {
@@ -303,7 +332,7 @@ DEBUG_STR(method_name);
 	return JY_ESUCCESS;
 }
 
-/** TODO COMMENT */
+/** XXX TODO COMMENT */
 static int
 jyo_get_static_mid(JNIEnv *jenv, const char *clazz, const char *method, char *sig, jclass *jcls, jmethodID *jmid)
 {
@@ -354,7 +383,7 @@ jyo_get_static_mid(JNIEnv *jenv, const char *clazz, const char *method, char *si
 	return JY_ESUCCESS;
 }
 
-/** TODO COMMENT */
+/** XXX TODO COMMENT */
 static char *
 jyo_get_method_signature(enum e_jyo_type type_ret, void *type_ret_detail, enum e_jyo_type type_param, const char *type_param_detail)
 {
@@ -410,7 +439,7 @@ jyo_get_method_signature(enum e_jyo_type type_ret, void *type_ret_detail, enum e
 	char *s;
 	size_t slen;
 
-	/* XXX Verifica os parâmetros passados. */
+	/* Verify the passed parameters. */
 	if (type_param == JYO_TJCLASS)
 		JY_ASSERT_RETURN(type_param_detail != NULL, NULL);
 	else if (type_param != JYO_TSTRING)
@@ -457,7 +486,16 @@ jyo_get_method_signature(enum e_jyo_type type_ret, void *type_ret_detail, enum e
 #undef SWITCH_TYPE_CAT_s
 }
 
-/** XXX TODO Envia a estrutura "st_jyo" à máquina virtual. */
+/**
+ * Converts the "st_jyo" struct to a Java object (jobject) and send it to a
+ * Java static method of a defined class.
+ *
+ * @param o Pointer to the "st_jyo" struct.
+ * @param clazz Name of the receiving class.
+ * @param method Name of the receiving method.
+ *
+ * @return -1 in case of error and 0 for success.
+ */
 int
 jyo_send(JNIEnv *jenv, struct st_jyo *p, const char *clazz, const char *method)
 {
@@ -491,7 +529,6 @@ jyo_send(JNIEnv *jenv, struct st_jyo *p, const char *clazz, const char *method)
 		return ret;
 	}
 
-	/* XXX 20060408 - fsilveira - reparo: era CallStaticVoidMethod() (errado) */
 	jret = (*jenv)->CallStaticBooleanMethod(jenv, jcls, jmid, jobj);
 	(*jenv)->DeleteLocalRef(jenv, jcls);
 	(*jenv)->DeleteLocalRef(jenv, jobj);
@@ -505,7 +542,11 @@ jyo_send(JNIEnv *jenv, struct st_jyo *p, const char *clazz, const char *method)
 	return jret == JNI_FALSE ? JY_EEXCEPTION : JY_ESUCCESS;
 }
 
-/** XXX Verifica o estado de erro ocorrido na estrutura "st_jyo". */
+/**
+ * Gets the error state ocurred with the "st_jyo" struct.
+ *
+ * @return The "e_jy_err" error enumerator.
+ */
 int
 jyo_error(struct st_jyo *p)
 {
@@ -604,26 +645,26 @@ do {									\
 	sig = NULL;
 	jmid = 0;
 
-	/* XXX Tenta achar o metodo com tipo de retorno "void". */
+	/* Try to find the method with "void" return type. */
 	if (jmid == 0) {
 		JY_GET_METHOD(jenv, jcls, jmid, pp->method_name, sig, JYO_TVOID, NULL, pp->data_type, pp->data);
 		rettype = JYO_TVOID;
 	}
 
-	/* XXX Tenta achar o metodo com tipo de retorno "boolean". */
+	/* Try to find the method with "boolean" return type. */
 	if (jmid == 0) {
 		JY_GET_METHOD(jenv, jcls, jmid, pp->method_name, sig, JYO_TBOOLEAN, NULL, pp->data_type, pp->data);
 		rettype = JYO_TBOOLEAN;
 	}
 
 	if ((jmid == 0) && (pp->data_type == JYO_TJYO)) {
-		/* Tenta achar o metodo com tipo de parametro java/lang/Object e retorno "void". */
+		/* Try to find the method with "java/lang/Object" parameter and "void" return type. */
 		if (jmid == 0) {
 			JY_GET_METHOD(jenv, jcls, jmid, pp->method_name, sig, JYO_TVOID, NULL, JYO_TJCLASS, g_str_clazz_object);
 			rettype = JYO_TVOID;
 		}
 
-		/* Tenta achar o metodo com tipo de parametro java/lang/Object e retorno "boolean". */
+		/* Try to find the method with "java/lang/Object" parameter and "boolean" return type. */
 		if (jmid == 0) {
 			JY_GET_METHOD(jenv, jcls, jmid, pp->method_name, sig, JYO_TBOOLEAN, NULL, JYO_TJCLASS, g_str_clazz_object);
 			rettype = JYO_TBOOLEAN;
@@ -782,7 +823,7 @@ do {									\
 	return JY_ESUCCESS;
 }
 
-/** TODO COMMENT */
+/** XXX TODO COMMENT */
 static int
 jyo_fill_jobject(JNIEnv *jenv, jobject j, struct st_jyo *p)
 {
@@ -830,7 +871,11 @@ jyo_fill_jobject(JNIEnv *jenv, jobject j, struct st_jyo *p)
 	return JY_ESUCCESS;
 }
 
-/** XXX TODO Converte a estrutura "st_jyo" em um objeto Java. */
+/**
+ * Converts an "st_jyo" struct into a "jobject".
+ *
+ * @return The "e_jy_err" error enumerator.
+ */
 int
 jyo_p2j(JNIEnv *jenv, struct st_jyo *p, jobject *j)
 {
@@ -1545,8 +1590,8 @@ jyo_fetch_property_string(JNIEnv *jenv, jclass jcls, jobject j, struct st_jyo *p
 		/*free(str);*/
 	}
 
-	/* XXX Está certo rodar o DeleteLocalRef() com ponteiro NULL, NÃO
-	 * APAGUE! Se isto não for feito, acontece um JNI leak. */
+	/* We MUST call DeleteLocalRef() with a NULL pointer or else a JNI LEAK
+	 * WILL occur. */
 	(*jenv)->DeleteLocalRef(jenv, jstr);
 
 	return ret;
@@ -1649,8 +1694,8 @@ jyo_fetch_property(JNIEnv *jenv, jclass jcls, jobject j, struct st_jyo *p, const
 	return JY_EENOSYS;
 }
 
-/*
- * XXX Preenche o "p"(estrutura C) utilizando o "j" como fonte, baseado na lista "mll".
+/**
+ * Fill up the "p" struct, using "j" as source based on the "mll" list.
  */
 static int
 jyo_fetch_property_list(JNIEnv *jenv, jclass jcls, jobject j, struct st_jyo *p, const struct st_method_ll *mll)
@@ -1673,7 +1718,11 @@ jyo_fetch_property_list(JNIEnv *jenv, jclass jcls, jobject j, struct st_jyo *p, 
 	return JY_ESUCCESS;
 }
 
-/** XXX TODO Converte o objeto Java (j) em uma estrutura "st_jyo" (p). */
+/**
+ * Converts a "jobject" into an "st_jyo" struct.
+ *
+ * @return The "e_jy_err" error enumerator.
+ */
 int
 jyo_j2p(JNIEnv *jenv, jobject j, struct st_jyo *p)
 {
@@ -1689,9 +1738,7 @@ jyo_j2p(JNIEnv *jenv, jobject j, struct st_jyo *p)
 
 	memset(p, 0, sizeof(struct st_jyo));
 
-	/*
-	 * XXX Pega classe java que foi passada
-	 */
+	/* Get the passed Java class. */
 	jcls = (*jenv)->GetObjectClass(jenv, j);
 	if ((jcls == NULL) || (*jenv)->ExceptionCheck(jenv)) {
 #ifdef JY_DEBUG_ERROR
@@ -1709,9 +1756,7 @@ jyo_j2p(JNIEnv *jenv, jobject j, struct st_jyo *p)
 		return JY_EEINVAL;
 	}
 
-	/*
-	 * XXX Extrai a assinatura da classe java
-	 */
+	/* Extract the Java class signature. */
 	str = jyo_get_jclass_name(jenv, jcls, j);
 	if (str == NULL) {
 #ifdef JY_DEBUG_ERROR
@@ -1728,9 +1773,7 @@ jyo_j2p(JNIEnv *jenv, jobject j, struct st_jyo *p)
 		return JY_EEINVAL;
 	}
 
-	/*
-	 * XXX Inicia a estrutura com a assinatura da classe.
-	 */
+	/* Initialize the struct with the class signature. */
 	ret = jyo_init(p, str);
 	free(str);
 
@@ -1750,10 +1793,8 @@ jyo_j2p(JNIEnv *jenv, jobject j, struct st_jyo *p)
 		return ret;
 	}
 
-	/*
-	 * XXX Lista em mll os metodos sem parametros e que nao retornam void
-	 * da classe jcls (os getters).
-	 */
+	/* Fills "mll" with the methods without parameters that doesn't return
+	 * void from the "jcls" class. */
 	ret = jyo_get_method_sign_list(jenv, jcls, &mll);
 	if ((ret != JY_ESUCCESS) || (mll == NULL)) {
 #ifdef JY_DEBUG_ERROR
@@ -1775,10 +1816,7 @@ jyo_j2p(JNIEnv *jenv, jobject j, struct st_jyo *p)
 		return ret;
 	}
 
-	/*
-	 * XXX
-	 * Preenche o "p"(estrutura C) utilizando o "j" como fonte, baseado na lista "mll".
-	 */
+	/* Fill up the "p" struct, using "j" as source based on the "mll" list. */
 	ret = jyo_fetch_property_list(jenv, jcls, j, p, mll);
 /*	jyo_free_method_ll(&mll);*/
 	(*jenv)->DeleteLocalRef(jenv, jcls);
@@ -1805,9 +1843,14 @@ jyo_free_method_ll(&mll);
 }
 
 /**
- * XXX
- * TODO Lê a propriedade de uma estrutura "st_jyo".
- * Passa só o ponteiro.
+ * Gets the pointer of the data of a "st_jyo" struct returned by "getter".
+ *
+ * @param o The pointer to the "st_jyo" struct.
+ * @param getter Name of the property to be fetched.
+ * @param data_type The data type enum of the data.
+ * @param data The variable where the pointer will be returned.
+ *
+ * @return -1 in case of error and 0 for success.
  */
 int
 jyo_get_property(struct st_jyo *p, char *getter, enum e_jyo_type data_type, void **data)
@@ -1821,9 +1864,14 @@ jyo_get_property(struct st_jyo *p, char *getter, enum e_jyo_type data_type, void
 }
 
 /**
- * XXX
- * TODO Lê dados da estrutura "st_jyo" e copia em "data".
- * Duplica os dados (aloca memória).
+ * Duplicates the data of a "st_jyo" struct returned by "getter".
+ *
+ * @param o The pointer to the "st_jyo" struct.
+ * @param getter Name of the property to be fetched.
+ * @param data_type The data type enum of the data to be read.
+ * @param buf The pointer where the data will be duplicated.
+ *
+ * @return -1 in case of error and 0 for success.
  */
 int
 jyo_get_property_copy(struct st_jyo *p, char *getter, enum e_jyo_type data_type, void **buf)
@@ -1839,7 +1887,7 @@ DEBUG_STR("copy");
 DEBUG_STR(getter);
 DEBUG_STR(p->clazz);
 
-	/* XXX varre lista e compara "getter" */
+	/* Iterate through the list comparing with "getter". */
 	for (reg_atual = p->properties;
 	    reg_atual != NULL;
 	    reg_atual = (struct st_jyo_property_ll *)reg_atual->ll.next) {
@@ -1850,7 +1898,7 @@ DEBUG_STR(p->clazz);
 	if (reg_atual == NULL)
 		return JY_ENOTFOUND;
 
-	/* XXX para casos de string ou objeto nulo */
+	/* In case the data type is a string or is a null object... */
 	if (data_type == JYO_TSTRING || data_type == JYO_TJYO) {
 		if (reg_atual->st.data == NULL) {
 			*buf = NULL;
@@ -1883,10 +1931,16 @@ DEBUG_PTR(*buf);
 	return JY_ESUCCESS;
 }
 
-/*
- * XXX
- * grava no buffer passado(buf) de tamanho "buf_size", e sem alocar nada, o
- * dado da estrutura "st_jyo", retornado pelo "getter"
+/**
+ * Reads the data of a "st_jyo" struct returned by "getter" into a passed buffer.
+ *
+ * @param o The pointer to the "st_jyo" struct.
+ * @param getter Name of the property to be fetched.
+ * @param data_type The data type enum of the data to be read.
+ * @param data The pointer of the buffer to store the data.
+ * @param data_size The size of the "data" buffer.
+ *
+ * @return -1 in case of error and 0 for success.
  */
 int
 jyo_get_property_buf(struct st_jyo *p, char *getter, enum e_jyo_type data_type, void *buf, size_t buf_size)
@@ -1908,7 +1962,7 @@ DEBUG_STR(p->clazz);
 		buf_size = jyo_get_type_size(data_type);
 	}
 
-	/* XXX varre lista e compara "getter" */
+	/* Iterate through the list comparing with "getter". */
 	for (reg_atual = p->properties;
 	    reg_atual != NULL;
 	    reg_atual = (struct st_jyo_property_ll *)reg_atual->ll.next) {
@@ -1919,7 +1973,7 @@ DEBUG_STR(p->clazz);
 	if (reg_atual == NULL)
 		return JY_ENOTFOUND;
 
-	/* XXX para casos de string ou objeto nulo */
+	/* In case the data type is a string or is a null object... */
 	if (data_type == JYO_TSTRING || data_type == JYO_TJYO) {
 		if (reg_atual->st.data == NULL) {
 			/* buf = NULL;*/
@@ -1929,7 +1983,7 @@ DEBUG_STR(p->clazz);
 	}
 
 	if (data_type == JYO_TSTRING) {
-		/* XXX ajusta o buf */
+		/* Ajust "buf". */
 		if ((strlen((char *)reg_atual->st.data) + 1) < buf_size)
 			buf_size = strlen((char *)reg_atual->st.data) + 1;
 	}

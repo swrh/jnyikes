@@ -92,7 +92,9 @@ enum e_jy_err {
 	JY_EEXCEPTION	=  -8, /*!< Exception caught. */
 };
 
-/** XXX Retorna os nomes dos erros. */
+/**
+ * @return The error strings or NULL in case the value is invalid.
+ */
 const char *jy_strerror(enum e_jy_err t);
 
 #endif /* !defined(_JNYIKES_H_) */
